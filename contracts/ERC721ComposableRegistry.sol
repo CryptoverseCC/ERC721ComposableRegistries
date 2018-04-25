@@ -30,9 +30,10 @@ contract ERC721ComposableRegistry {
 
     function ownerOf(ERC721 erc721, uint tokenId) public view returns (address) {
         TokenIdentifier memory parent = parents[erc721][tokenId];
-        if (parent.erc721 != 0) {
+        while (parent.erc721 != 0) {
             erc721 = ERC721(parent.erc721);
             tokenId = parent.tokenId;
+            parent = parents[erc721][tokenId];
         }
         return erc721.ownerOf(tokenId);
     }

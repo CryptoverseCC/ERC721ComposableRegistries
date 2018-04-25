@@ -95,3 +95,20 @@ contract('ERC721ComposableRegistry', (accounts) => {
 		assert.equal(owner, accounts[0]);
 	});
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+	it("Ownership is a transitive relation", async () => {
+		const erc721 = await SampleERC721.deployed();
+		await erc721.create();
+		await erc721.create();
+		await erc721.create();
+		const instance = await ERC721ComposableRegistry.deployed();
+	    erc721.approve(instance.address, 2);
+	    erc721.approve(instance.address, 3);
+        await instance.transfer(erc721.address, 1, erc721.address, 2);
+        await instance.transfer(erc721.address, 2, erc721.address, 3);
+        const owner = await instance.ownerOf(erc721.address, 3);
+		assert.equal(owner, accounts[0]);
+	});
+});
