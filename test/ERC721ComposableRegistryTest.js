@@ -31,6 +31,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
 		await erc721.create({from: accounts[1]});
 		await erc721.create();
 		const instance = await ERC721ComposableRegistry.deployed();
+        erc721.approve(instance.address, 2);
 		await instance.transfer(erc721.address, 1, erc721.address, 2);
 		const owner = await instance.ownerOf(erc721.address, 2);
 		assert.equal(owner, accounts[1]);
@@ -73,8 +74,9 @@ contract('ERC721ComposableRegistry', (accounts) => {
 		await erc721.create();
 		await erc721.create();
 		const instance = await ERC721ComposableRegistry.deployed();
+	    erc721.approve(instance.address, 2);
         await instance.transfer(erc721.address, 1, erc721.address, 2);
         const owner = await erc721.ownerOf(2)
-		assert.equal( ,instance.address)
+		assert.equal(owner ,instance.address)
 	});
 });
