@@ -65,3 +65,16 @@ contract('ERC721ComposableRegistry', (accounts) => {
 		}
 	});
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+	it("Registry physically owns child token", async () => {
+		const erc721 = await SampleERC721.deployed();
+		await erc721.create();
+		await erc721.create();
+		const instance = await ERC721ComposableRegistry.deployed();
+        await instance.transfer(erc721.address, 1, erc721.address, 2);
+        const owner = await erc721.ownerOf(2)
+		assert.equal( ,instance.address)
+	});
+});
