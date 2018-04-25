@@ -1,12 +1,5 @@
 pragma solidity ^0.4.23;
 
-contract ERC20 {
-
-    function transfer(address to, uint amount) public returns (bool);
-
-    function transferFrom(address owner, address to, uint amount) public returns (bool);
-}
-
 contract ERC721 {
 
     function ownerOf(uint tokenId) public view returns (address);
@@ -23,6 +16,7 @@ contract ERC721ComposableRegistry {
 
     function transfer(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) public {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
+        require(ownerOf(toErc721, toTokenId) != 0);
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
     }
 

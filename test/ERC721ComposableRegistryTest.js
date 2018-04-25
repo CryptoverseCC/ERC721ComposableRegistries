@@ -44,6 +44,24 @@ contract('ERC721ComposableRegistry', (accounts) => {
 		await erc721.create({from: accounts[1]});
 		await erc721.create();
 		const instance = await ERC721ComposableRegistry.deployed();
-		expect(instance.transfer(erc721.address, 2, erc721.address, 1)).to.be.rejected;
+		try {
+    		await instance.transfer(erc721.address, 2, erc721.address, 1);
+		    assert.fail();
+		} catch (ignore) {
+		}
+	});
+});
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+	it("I cannot transfer to non-existing token", async () => {
+		const erc721 = await SampleERC721.deployed();
+		await erc721.create();
+		const instance = await ERC721ComposableRegistry.deployed();
+		try {
+		    await instance.transfer(erc721.address, 6, erc721.address, 1);
+		    assert.fail();
+		} catch (ignore) {
+		}
 	});
 });
