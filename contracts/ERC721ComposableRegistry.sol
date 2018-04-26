@@ -15,6 +15,12 @@ contract ERC721ComposableRegistry {
         uint tokenId;
     }
 
+    function onERC721Received(address from, uint whichTokenId, bytes data) public returns (bytes4) {
+        ERC721 whichErc721 = ERC721(msg.sender);
+        parents[whichErc721][whichTokenId] = TokenIdentifier(whichErc721, 1);
+        return 0xf0b9e5ba;
+    }
+
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
