@@ -135,5 +135,7 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         await composableRegistry.transfer(erc721.address, 2, erc721.address, 1);
         await registry.transfer(erc721.address, 1, erc20.address, 50);
         await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 20);
+        const balance = await registry.balanceOf(erc721.address, 2, erc20.address);
+        assert.equal(balance, 20);
     });
 });
