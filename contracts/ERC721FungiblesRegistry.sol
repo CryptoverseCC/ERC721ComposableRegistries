@@ -8,13 +8,13 @@ contract ERC721 {
 
 contract ERC721FungiblesRegistry {
 
-    uint private balance;
+    mapping (address => mapping (uint => mapping (address => uint))) private balances;
 
     function transfer(ERC721 erc721, uint tokenId, ERC20 erc20, uint amount) public {
-        balance += amount;
+        balances[erc721][tokenId][erc20] += amount;
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {
-        return balance;
+        return balances[erc721][tokenId][erc20];
     }
 }
