@@ -49,6 +49,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
             await instance.transfer(erc721.address, 2, erc721.address, 1);
             assert.fail();
         } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 });
@@ -63,6 +64,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
             await instance.transfer(erc721.address, 6, erc721.address, 1);
             assert.fail();
         } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 });
@@ -109,5 +111,23 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await instance.transfer(erc721.address, 2, erc721.address, 3);
         const owner = await instance.ownerOf(erc721.address, 3);
         assert.equal(owner, accounts[0]);
+    });
+});
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("I cannot transfer a token owned by his token", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create({from: accounts[1]});
+        await erc721.create();
+        await erc721.approve(registry.address, 2);
+        await registry.transfer(erc721.address, 1, erc721.address, 2);
+        try {
+            await registry.transferToAddress(accounts[0], erc721.address, 2);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
     });
 });
