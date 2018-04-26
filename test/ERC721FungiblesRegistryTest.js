@@ -169,3 +169,21 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         assert.equal(balance, 30);
     });
 });
+
+contract('ERC721FungiblesRegistry', (accounts) => {
+
+    it("My token cannot transfer more than it owns", async () => {
+        const registry = await ERC721FungiblesRegistry.deployed();
+        const erc20 = await SampleERC20.deployed();
+        await erc20.approve(registry.address, 999);
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        try {
+            await registry.transferToAddress(erc721.address, 1, accounts[1], erc20.address, 51);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
