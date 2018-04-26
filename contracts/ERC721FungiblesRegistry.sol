@@ -25,6 +25,7 @@ contract ERC721FungiblesRegistry {
 
     function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
         require(composableRegistry.ownerOf(fromErc721, fromTokenId) == msg.sender);
+        require(composableRegistry.ownerOf(toErc721, toTokenId) != 0);
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         balances[toErc721][toTokenId][erc20] += amount;

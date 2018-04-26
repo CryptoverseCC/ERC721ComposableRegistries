@@ -231,13 +231,31 @@ contract('ERC721FungiblesRegistry', (accounts) => {
 
 contract('ERC721FungiblesRegistry', (accounts) => {
 
-    it("Cannot transfer to non-existing token", async () => {
+    it("I cannot transfer to non-existing token", async () => {
         const registry = await ERC721FungiblesRegistry.deployed();
         const erc20 = await SampleERC20.deployed();
         await erc20.approve(registry.address, 999);
         const erc721 = await SampleERC721.deployed();
         try {
             await registry.transfer(erc721.address, 6, erc20.address, 50);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
+
+contract('ERC721FungiblesRegistry', (accounts) => {
+
+    it("My token cannot transfer to non-existing token", async () => {
+        const registry = await ERC721FungiblesRegistry.deployed();
+        const erc20 = await SampleERC20.deployed();
+        await erc20.approve(registry.address, 999);
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        try {
+            await registry.transferFrom(erc721.address, 1, erc721.address, 6, erc20.address, 20);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
