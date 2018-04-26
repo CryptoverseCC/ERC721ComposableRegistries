@@ -5,7 +5,11 @@ import 'zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol';
 contract SampleERC721 is ERC721Token("SampleERC721", "SAMPLE") {
 
     function create() public {
-        uint256 tokenId = allTokens.length + 1;
+        uint tokenId = allTokens.length + 1;
         _mint(msg.sender, tokenId);
+    }
+
+    function fakeOnERC721Received(ERC721Receiver receiver, address from, uint tokenId, bytes data) public {
+        receiver.onERC721Received(from, tokenId, data);
     }
 }
