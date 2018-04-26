@@ -104,7 +104,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await erc721.create();
         await erc721.create();
         const instance = await ERC721ComposableRegistry.deployed();
-        await erc721.setApprovalForAll(instance.address);
+        await erc721.setApprovalForAll(instance.address, true);
         await instance.transfer(erc721.address, 1, erc721.address, 2);
         await instance.transfer(erc721.address, 2, erc721.address, 3);
         const owner = await instance.ownerOf(erc721.address, 3);
