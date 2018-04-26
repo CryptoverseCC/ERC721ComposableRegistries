@@ -3,6 +3,8 @@ pragma solidity ^0.4.23;
 import "./ERC721ComposableRegistry.sol";
 
 contract ERC20 {
+
+    function transferFrom(address from, address to, uint amount) public returns (bool);
 }
 
 contract ERC721FungiblesRegistry {
@@ -23,6 +25,10 @@ contract ERC721FungiblesRegistry {
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         balances[toErc721][toTokenId][erc20] += amount;
+    }
+
+    function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public {
+        require(erc20.transferFrom(msg.sender, to, amount));
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {

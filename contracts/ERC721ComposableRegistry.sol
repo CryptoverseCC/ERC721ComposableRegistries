@@ -3,7 +3,7 @@ pragma solidity ^0.4.23;
 contract ERC721 {
 
     function ownerOf(uint tokenId) public view returns (address);
-    function transferFrom(address _from, address _to, uint256 _tokenId) public;
+    function transferFrom(address from, address to, uint tokenId) public;
 }
 
 contract ERC721ComposableRegistry {
