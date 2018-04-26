@@ -158,3 +158,21 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(owner, accounts[1]);
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("Cannot transfer parent to be child of its child", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.create();
+        await erc721.setApprovalForAll(registry.address, true);
+        await registry.transfer(erc721.address, 1, erc721.address, 2);
+        try {
+            await registry.transfer(erc721.address, 2, erc721.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
