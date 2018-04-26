@@ -131,3 +131,18 @@ contract('ERC721ComposableRegistry', (accounts) => {
         }
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("I am not owner of token I sent to him", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.create();
+        await erc721.approve(registry.address, 2);
+        await registry.transfer(erc721.address, 1, erc721.address, 2);
+        await registry.transferToAddress(accounts[1], erc721.address, 2);
+        const owner = await registry.ownerOf(erc721.address, 2);
+        assert.equal(owner, accounts[1]);
+    });
+});
