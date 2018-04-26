@@ -228,3 +228,19 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         assert.equal(balance, 20);
     });
 });
+
+contract('ERC721FungiblesRegistry', (accounts) => {
+
+    it("Cannot transfer to non-existing token", async () => {
+        const registry = await ERC721FungiblesRegistry.deployed();
+        const erc20 = await SampleERC20.deployed();
+        await erc20.approve(registry.address, 999);
+        const erc721 = await SampleERC721.deployed();
+        try {
+            await registry.transfer(erc721.address, 6, erc20.address, 50);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
