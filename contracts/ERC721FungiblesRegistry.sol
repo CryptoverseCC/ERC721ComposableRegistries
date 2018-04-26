@@ -4,6 +4,8 @@ contract ERC20 {
 }
 
 contract ERC721 {
+
+    function ownerOf(uint tokenId) public view returns (address);
 }
 
 contract ERC721FungiblesRegistry {
@@ -15,6 +17,7 @@ contract ERC721FungiblesRegistry {
     }
 
     function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
+        require(fromErc721.ownerOf(fromTokenId) == msg.sender);
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         balances[toErc721][toTokenId][erc20] += amount;
