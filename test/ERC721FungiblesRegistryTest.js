@@ -1,4 +1,5 @@
 const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
+const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const SampleERC20 = artifacts.require("SampleERC20.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
 
@@ -118,5 +119,21 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
+    });
+});
+
+contract('ERC721FungiblesRegistry', (accounts) => {
+
+    it("Token of my token can transfer", async () => {
+        const registry = await ERC721FungiblesRegistry.deployed();
+        const composableRegistry = await ERC721ComposableRegistry.deployed();
+        const erc20 = await SampleERC20.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.create();
+        await erc721.approve(composableRegistry.address, 1);
+        await composableRegistry.transfer(erc721.address, 2, erc721.address, 1);
+        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 20);
     });
 });
