@@ -11,7 +11,7 @@ contract ERC721FungiblesRegistry {
     uint private balance;
 
     function transfer(ERC721 erc721, uint tokenId, ERC20 erc20, uint amount) public {
-        balance = amount;
+        balance += amount;
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {
