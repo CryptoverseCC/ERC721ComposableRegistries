@@ -17,8 +17,7 @@ contract ERC721ComposableRegistry {
 
     function onERC721Received(address from, uint whichTokenId, bytes to) public returns (bytes4) {
         ERC721 whichErc721 = ERC721(msg.sender);
-        address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
-        require(ownerOfWhichByErc721 == address(this));
+        require(ownerOf(whichErc721, whichTokenId) == address(this));
         // Can't use data parameter for now due to failing tests.
         // See https://github.com/trufflesuite/truffle/issues/569
         parents[whichErc721][whichTokenId] = TokenIdentifier(whichErc721, 1);

@@ -31,3 +31,21 @@ contract('ERC721ComposableRegistry', (accounts) => {
         }
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("I cannot transfer token owned by another token", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.create();
+        const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '2'.padStart(64, '0');
+        await erc721.safeTransferFrom(accounts[0], registry.address, 1);
+        try {
+            await erc721.fakeOnERC721Received(registry.address, accounts[0], 1, '');
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
