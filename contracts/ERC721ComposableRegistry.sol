@@ -42,7 +42,9 @@ contract ERC721ComposableRegistry {
         if (ownerOfWhichByErc721 != address(this)) {
             whichErc721.transferFrom(ownerOfWhichByErc721, address(this), whichTokenId);
         }
+        TokenIdentifier memory parent = parents[whichErc721][whichTokenId];
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
+        delete parentToChildren[parent.erc721][parent.tokenId];
         parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
     }
 
