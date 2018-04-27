@@ -60,4 +60,7 @@ contract ERC721ComposableRegistry {
         }
         return erc721.ownerOf(tokenId);
     }
+
+    function children(ERC721 erc721, uint tokenId) public view returns (ERC721[], uint[]) {
+    }
 }
