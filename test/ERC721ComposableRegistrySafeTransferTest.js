@@ -8,7 +8,10 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const erc721 = await SampleERC721.deployed();
         await erc721.create({from: accounts[1]});
         await erc721.create();
-        await erc721.safeTransferFrom(accounts[0], registry.address, 2);
+        const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
+        // Can't set data parameter for now.
+        // See https://github.com/trufflesuite/truffle/issues/569
+        await erc721.safeTransferFrom(accounts[0], registry.address, 2/*, to*/);
         const owner = await registry.ownerOf(erc721.address, 2);
         assert.equal(owner, accounts[1]);
     });
