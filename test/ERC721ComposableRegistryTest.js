@@ -176,3 +176,19 @@ contract('ERC721ComposableRegistry', (accounts) => {
         }
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("Cannot transfer token to itself", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.approve(registry.address, 1);
+        try {
+            await registry.transfer(erc721.address, 1, erc721.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
