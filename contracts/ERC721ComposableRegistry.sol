@@ -9,6 +9,7 @@ contract ERC721 {
 contract ERC721ComposableRegistry {
 
     mapping (address => mapping (uint => TokenIdentifier)) parents;
+    mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
 
     struct TokenIdentifier {
         ERC721 erc721;
@@ -40,6 +41,7 @@ contract ERC721ComposableRegistry {
             whichErc721.transferFrom(ownerOfWhichByErc721, address(this), whichTokenId);
         }
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
+        parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
     }
 
     function requireNoCircularDependency(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private view {
@@ -62,5 +64,13 @@ contract ERC721ComposableRegistry {
     }
 
     function children(ERC721 erc721, uint tokenId) public view returns (ERC721[], uint[]) {
+        TokenIdentifier[] memory c = parentToChildren[erc721][tokenId];
+        ERC721[] memory erc721s = new ERC721[](c.length);
+        uint[] memory tokenIds = new uint[](c.length);
+        for (uint i = 0; i < c.length; i++) {
+            erc721s[i] = c[i].erc721;
+            tokenIds[i] = c[i].tokenId;
+        }
+        return (erc721s, tokenIds);
     }
 }
