@@ -44,8 +44,15 @@ contract ERC721ComposableRegistry {
         }
         TokenIdentifier memory parent = parents[whichErc721][whichTokenId];
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
-        TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
-        c.length--;
+        if (parent.erc721 != ERC721(0)) {
+            TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
+            for (uint i = 0; i < c.length - 1; i++) {
+                if (c[i].erc721 == whichErc721 && c[i].tokenId == whichTokenId) {
+                    c[i] = c[c.length - 1];
+                }
+            }
+            c.length--;
+        }
         parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
     }
 
