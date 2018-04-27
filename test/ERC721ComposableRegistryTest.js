@@ -192,3 +192,23 @@ contract('ERC721ComposableRegistry', (accounts) => {
         }
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("Cannot transfer token to be child of its grandchild", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.create();
+        await erc721.create();
+        await erc721.setApprovalForAll(registry.address, true);
+        await registry.transfer(erc721.address, 1, erc721.address, 2);
+        await registry.transfer(erc721.address, 2, erc721.address, 3);
+        try {
+            await registry.transfer(erc721.address, 3, erc721.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});

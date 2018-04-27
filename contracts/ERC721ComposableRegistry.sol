@@ -34,14 +34,21 @@ contract ERC721ComposableRegistry {
     function transfer(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) public {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         require(ownerOf(toErc721, toTokenId) != 0);
-        require(toErc721 != whichErc721 || toTokenId != whichTokenId);
-        TokenIdentifier memory parent = parents[toErc721][toTokenId];
-        require(parent.erc721 != whichErc721 || parent.tokenId != whichTokenId);
+        requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
         if (ownerOfWhichByErc721 != address(this)) {
             whichErc721.transferFrom(ownerOfWhichByErc721, address(this), whichTokenId);
         }
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
+    }
+
+    function requireNoCircularDependency(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private view {
+        do {
+            require(toErc721 != whichErc721 || toTokenId != whichTokenId);
+            TokenIdentifier memory parent = parents[toErc721][toTokenId];
+            toErc721 = parent.erc721;
+            toTokenId = parent.tokenId;
+        } while (toErc721 != ERC721(0));
     }
 
     function ownerOf(ERC721 erc721, uint tokenId) public view returns (address) {
