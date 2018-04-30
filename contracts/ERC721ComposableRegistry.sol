@@ -40,23 +40,6 @@ contract ERC721ComposableRegistry {
         return ret;
     }
 
-    function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
-        require(ownerOf(whichErc721, whichTokenId) == msg.sender);
-        address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
-        whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
-        TokenIdentifier memory parent = parents[whichErc721][whichTokenId];
-        delete parents[whichErc721][whichTokenId];
-        if (parent.erc721 != ERC721(0)) {
-            TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
-            uint index = childIndexInParentToChildren[whichErc721][whichTokenId];
-            uint last = c.length - 1;
-            if (index < last) {
-                c[index] = c[last];
-            }
-            c.length--;
-        }
-    }
-
     function transfer(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) public {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         require(ownerOf(toErc721, toTokenId) != 0);
@@ -85,6 +68,23 @@ contract ERC721ComposableRegistry {
             toErc721 = parent.erc721;
             toTokenId = parent.tokenId;
         } while (toErc721 != ERC721(0));
+    }
+
+    function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
+        require(ownerOf(whichErc721, whichTokenId) == msg.sender);
+        address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
+        whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
+        TokenIdentifier memory parent = parents[whichErc721][whichTokenId];
+        delete parents[whichErc721][whichTokenId];
+        if (parent.erc721 != ERC721(0)) {
+            TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
+            uint index = childIndexInParentToChildren[whichErc721][whichTokenId];
+            uint last = c.length - 1;
+            if (index < last) {
+                c[index] = c[last];
+            }
+            c.length--;
+        }
     }
 
     function ownerOf(ERC721 erc721, uint tokenId) public view returns (address) {
