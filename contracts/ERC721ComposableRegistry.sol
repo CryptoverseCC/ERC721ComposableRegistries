@@ -46,17 +46,8 @@ contract ERC721ComposableRegistry {
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
         whichErc721.transferFrom(ownerOfWhichByErc721, address(this), whichTokenId);
-        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
+        removeFromParentToChildren(whichErc721, whichTokenId);
         childToParent[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
-        if (parent.erc721 != ERC721(0)) {
-            TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
-            uint index = childToIndexInParentToChildren[whichErc721][whichTokenId];
-            uint last = c.length - 1;
-            if (index < last) {
-                c[index] = c[last];
-            }
-            c.length--;
-        }
         parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
         childToIndexInParentToChildren[whichErc721][whichTokenId] = parentToChildren[toErc721][toTokenId].length - 1;
     }
@@ -74,8 +65,13 @@ contract ERC721ComposableRegistry {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
         whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
-        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
+        removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
+        delete childToIndexInParentToChildren[whichErc721][whichTokenId];
+    }
+
+    function removeFromParentToChildren(ERC721 whichErc721, uint whichTokenId) private {
+        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
         if (parent.erc721 != ERC721(0)) {
             TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
             uint index = childToIndexInParentToChildren[whichErc721][whichTokenId];
