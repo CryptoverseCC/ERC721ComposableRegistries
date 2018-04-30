@@ -10,13 +10,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const erc721 = await SampleERC721.deployed();
         await erc721.create({from: accounts[1]});
         await erc721.create();
-        const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
-        const transferMethodTransactionData = web3Abi.encodeFunctionCall(
-            SampleERC721.abi[13], [accounts[0], registry.address, 2, to]
-        );
-        await web3.eth.sendTransaction({
-            from: accounts[0], to: erc721.address, data: transferMethodTransactionData, value: 0, gas: 500000
-        });
+        await safeTransferFrom(accounts[0], registry.address, erc721.address, 1, erc721.address, 2);
         const owner = await registry.ownerOf(erc721.address, 2);
         assert.equal(owner, accounts[1]);
     });
@@ -30,7 +24,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await erc721.create();
         await erc721.create();
         try {
-            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
+            const to = formatToByteArray(erc721.address, 1);
             await erc721.fakeOnERC721Received(registry.address, accounts[0], 2, to);
             assert.fail();
         } catch (ignore) {
@@ -50,7 +44,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await erc721.approve(registry.address, 2);
         await registry.transfer(erc721.address, 1, erc721.address, 2);
         try {
-            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '3'.padStart(64, '0');
+            const to = formatToByteArray(erc721.address, 3);
             await erc721.fakeOnERC721Received(registry.address, accounts[0], 2, to);
             assert.fail();
         } catch (ignore) {
@@ -66,13 +60,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const erc721 = await SampleERC721.deployed();
         await erc721.create();
         try {
-            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '6'.padStart(64, '0');
-            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
-                SampleERC721.abi[13], [accounts[0], registry.address, 1, to]
-            );
-            await web3.eth.sendTransaction({
-                from: accounts[0], to: erc721.address, data: transferMethodTransactionData, value: 0, gas: 500000
-            });
+            await safeTransferFrom(accounts[0], registry.address, erc721.address, 6, erc721.address, 1);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
@@ -87,13 +75,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const erc721 = await SampleERC721.deployed();
         await erc721.create();
         try {
-            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
-            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
-                SampleERC721.abi[13], [accounts[0], registry.address, 1, to]
-            );
-            await web3.eth.sendTransaction({
-                from: accounts[0], to: erc721.address, data: transferMethodTransactionData, value: 0, gas: 500000
-            });
+            await safeTransferFrom(accounts[0], registry.address, erc721.address, 1, erc721.address, 1);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
@@ -109,16 +91,29 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await erc721.create();
         await erc721.create();
         try {
-            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0') + 'F'.repeat(64);
-            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
-                SampleERC721.abi[13], [accounts[0], registry.address, 2, to]
-            );
-            await web3.eth.sendTransaction({
-                from: accounts[0], to: erc721.address, data: transferMethodTransactionData, value: 0, gas: 500000
-            });
+            const to = formatToByteArray(erc721.address, 1) + 'F'.repeat(64);
+            await safeTransferFromImpl(accounts[0], registry.address, to, erc721.address, 2);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 });
+
+async function safeTransferFrom(from, registryAddress, toErc721, toTokenId, whichErc721, whichTokenId) {
+    const to = formatToByteArray(toErc721, toTokenId);
+    await safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId);
+}
+
+async function safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId) {
+    const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+        SampleERC721.abi[13], [from, registryAddress, whichTokenId, to]
+    );
+    await web3.eth.sendTransaction({
+        from, to: whichErc721, data: transferMethodTransactionData, value: 0, gas: 500000
+    });
+}
+
+function formatToByteArray(toErc721, toTokenId) {
+    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
+}
