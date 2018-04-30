@@ -22,6 +22,7 @@ contract ERC721ComposableRegistry {
         ERC721 toErc721 = ERC721(address(bytesToUint(to, 0)));
         uint toTokenId = bytesToUint(to, 32);
         require(ownerOf(toErc721, toTokenId) != 0);
+        requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
         return 0xf0b9e5ba;
     }
