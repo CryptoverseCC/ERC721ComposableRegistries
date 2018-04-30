@@ -10,6 +10,7 @@ contract ERC721ComposableRegistry {
 
     mapping (address => mapping (uint => TokenIdentifier)) parents;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
+    mapping (address => mapping (uint => uint)) childIndexInParentToChildren;
 
     struct TokenIdentifier {
         ERC721 erc721;
@@ -46,10 +47,10 @@ contract ERC721ComposableRegistry {
         delete parents[whichErc721][whichTokenId];
         if (parent.erc721 != ERC721(0)) {
             TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
-            for (uint i = 0; i < c.length - 1; i++) {
-                if (c[i].erc721 == whichErc721 && c[i].tokenId == whichTokenId) {
-                    c[i] = c[c.length - 1];
-                }
+            uint index = childIndexInParentToChildren[whichErc721][whichTokenId];
+            uint last = c.length - 1;
+            if (index < last) {
+                c[index] = c[last];
             }
             c.length--;
         }
@@ -65,14 +66,15 @@ contract ERC721ComposableRegistry {
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
         if (parent.erc721 != ERC721(0)) {
             TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
-            for (uint i = 0; i < c.length - 1; i++) {
-                if (c[i].erc721 == whichErc721 && c[i].tokenId == whichTokenId) {
-                    c[i] = c[c.length - 1];
-                }
+            uint index = childIndexInParentToChildren[whichErc721][whichTokenId];
+            uint last = c.length - 1;
+            if (index < last) {
+                c[index] = c[last];
             }
             c.length--;
         }
         parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
+        childIndexInParentToChildren[whichErc721][whichTokenId] = parentToChildren[toErc721][toTokenId].length - 1;
     }
 
     function requireNoCircularDependency(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private view {
