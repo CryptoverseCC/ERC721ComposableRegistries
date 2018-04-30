@@ -100,3 +100,25 @@ contract('ERC721ComposableRegistry', (accounts) => {
         }
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("Format passed to safeTransferFrom must be (erc721address + tokenId)", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        await erc721.create();
+        try {
+            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0') + 'F'.repeat(64);
+            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+                SampleERC721.abi[13], [accounts[0], registry.address, 2, to]
+            );
+            await web3.eth.sendTransaction({
+                from: accounts[0], to: erc721.address, data: transferMethodTransactionData, value: 0, gas: 500000
+            });
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});

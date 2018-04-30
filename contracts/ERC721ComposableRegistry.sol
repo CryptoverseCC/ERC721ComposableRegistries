@@ -17,6 +17,7 @@ contract ERC721ComposableRegistry {
     }
 
     function onERC721Received(address from, uint whichTokenId, bytes to) public returns (bytes4) {
+        require(to.length == 64);
         ERC721 whichErc721 = ERC721(msg.sender);
         require(ownerOf(whichErc721, whichTokenId) == address(this));
         ERC721 toErc721 = ERC721(address(bytesToUint(to, 0)));
