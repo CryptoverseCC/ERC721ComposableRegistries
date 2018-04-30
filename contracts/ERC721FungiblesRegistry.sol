@@ -20,6 +20,7 @@ contract ERC721FungiblesRegistry {
     function tokenFallback(address from, uint amount, bytes to) public returns (bytes4) {
         ERC721 toErc721 = ERC721(address(bytesToUint(to, 0)));
         uint toTokenId = bytesToUint(to, 32);
+        require(composableRegistry.ownerOf(toErc721, toTokenId) != 0);
         ERC20 erc20 = ERC20(msg.sender);
         balances[toErc721][toTokenId][erc20] += amount;
         return 0xc0ee0b8a;

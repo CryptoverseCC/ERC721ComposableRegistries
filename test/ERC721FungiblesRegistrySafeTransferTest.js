@@ -16,6 +16,22 @@ contract('ERC721FungiblesRegistry', (accounts) => {
     });
 });
 
+contract('ERC721FungiblesRegistry', (accounts) => {
+
+    it("Cannot transfer to non-existing token", async () => {
+        const registry = await ERC721FungiblesRegistry.deployed();
+        const erc20 = await SampleERC20.deployed();
+        const erc721 = await SampleERC721.deployed();
+        const to = formatToByteArray(erc721.address, 6);
+        try {
+            await erc20.transferAndCall(registry.address, 50, to);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
+
 function formatToByteArray(toErc721, toTokenId) {
     return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
 }
