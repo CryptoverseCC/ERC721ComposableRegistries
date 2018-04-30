@@ -27,6 +27,7 @@ contract ERC721ComposableRegistry {
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
         parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
+        childIndexInParentToChildren[whichErc721][whichTokenId] = parentToChildren[toErc721][toTokenId].length - 1;
         return 0xf0b9e5ba;
     }
 
