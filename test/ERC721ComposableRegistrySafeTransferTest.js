@@ -58,3 +58,24 @@ contract('ERC721ComposableRegistry', (accounts) => {
         }
     });
 });
+
+contract('ERC721ComposableRegistry', (accounts) => {
+
+    it("Cannot safe-transfer to non-existing token", async () => {
+        const registry = await ERC721ComposableRegistry.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        try {
+            const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '6'.padStart(64, '0');
+            const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+                SampleERC721.abi[13], [accounts[0], registry.address, 1, to]
+            );
+            await web3.eth.sendTransaction({
+                from: accounts[0], to: erc721.address, data: transferMethodTransactionData, value: 0, gas: 500000
+            });
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+});
