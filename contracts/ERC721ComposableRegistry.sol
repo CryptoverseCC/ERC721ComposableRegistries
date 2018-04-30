@@ -44,7 +44,15 @@ contract ERC721ComposableRegistry {
         whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
         TokenIdentifier memory parent = parents[whichErc721][whichTokenId];
         delete parents[whichErc721][whichTokenId];
-        delete parentToChildren[parent.erc721][parent.tokenId];
+        if (parent.erc721 != ERC721(0)) {
+            TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
+            for (uint i = 0; i < c.length - 1; i++) {
+                if (c[i].erc721 == whichErc721 && c[i].tokenId == whichTokenId) {
+                    c[i] = c[c.length - 1];
+                }
+            }
+            c.length--;
+        }
     }
 
     function transfer(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) public {
