@@ -25,6 +25,7 @@ contract ERC721ComposableRegistry {
         require(ownerOf(toErc721, toTokenId) != 0);
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
+        parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
         return 0xf0b9e5ba;
     }
 
@@ -51,9 +52,7 @@ contract ERC721ComposableRegistry {
         require(ownerOf(toErc721, toTokenId) != 0);
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
-        if (ownerOfWhichByErc721 != address(this)) {
-            whichErc721.transferFrom(ownerOfWhichByErc721, address(this), whichTokenId);
-        }
+        whichErc721.transferFrom(ownerOfWhichByErc721, address(this), whichTokenId);
         TokenIdentifier memory parent = parents[whichErc721][whichTokenId];
         parents[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
         if (parent.erc721 != ERC721(0)) {
