@@ -64,8 +64,8 @@ contract ERC721ComposableRegistry {
 
     function add(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
         childToParent[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
-        parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
-        childToIndexInParentToChildren[whichErc721][whichTokenId] = parentToChildren[toErc721][toTokenId].length - 1;
+        uint length = parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
+        childToIndexInParentToChildren[whichErc721][whichTokenId] = length - 1;
     }
 
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
