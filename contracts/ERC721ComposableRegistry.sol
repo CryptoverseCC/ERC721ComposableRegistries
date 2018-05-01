@@ -17,7 +17,7 @@ contract ERC721ComposableRegistry {
         uint tokenId;
     }
 
-    function onERC721Received(address from, uint whichTokenId, bytes to) public returns (bytes4) {
+    function onERC721Received(address /* from */, uint whichTokenId, bytes to) public returns (bytes4) {
         require(to.length == 64);
         ERC721 whichErc721 = ERC721(msg.sender);
         require(ownerOf(whichErc721, whichTokenId) == address(this));
@@ -43,7 +43,7 @@ contract ERC721ComposableRegistry {
         require(exists(toErc721, toTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
-        whichErc721.call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);
+        address(whichErc721).call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);
         whichErc721.transferFrom(ownerOfWhichByErc721, this, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         add(toErc721, toTokenId, whichErc721, whichTokenId);
@@ -71,7 +71,7 @@ contract ERC721ComposableRegistry {
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
-        whichErc721.call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);
+        address(whichErc721).call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);
         whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];

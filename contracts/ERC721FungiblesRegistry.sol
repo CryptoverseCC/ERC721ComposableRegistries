@@ -17,7 +17,7 @@ contract ERC721FungiblesRegistry {
         composableRegistry = cr;
     }
 
-    function tokenFallback(address from, uint amount, bytes to) public returns (bytes4) {
+    function tokenFallback(address /* from */, uint amount, bytes to) public returns (bytes4) {
         require(to.length == 64);
         ERC721 toErc721 = ERC721(address(bytesToUint(to, 0)));
         uint toTokenId = bytesToUint(to, 32);
@@ -27,7 +27,7 @@ contract ERC721FungiblesRegistry {
         return 0xc0ee0b8a;
     }
 
-    function receiveApproval(address from, uint amount, address ignore, bytes to) public returns (bytes4) {
+    function receiveApproval(address from, uint amount, address /* token */, bytes to) public returns (bytes4) {
         receiveApproval(from, amount, to);
         return 0x8f4ffcb1;
     }
