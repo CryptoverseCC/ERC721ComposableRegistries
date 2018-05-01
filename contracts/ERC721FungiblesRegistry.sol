@@ -21,7 +21,7 @@ contract ERC721FungiblesRegistry {
         require(to.length == 64);
         ERC721 toErc721 = ERC721(address(bytesToUint(to, 0)));
         uint toTokenId = bytesToUint(to, 32);
-        require(composableRegistry.ownerOf(toErc721, toTokenId) != 0);
+        require(exists(toErc721, toTokenId));
         ERC20 erc20 = ERC20(msg.sender);
         balances[toErc721][toTokenId][erc20] += amount;
         return 0xc0ee0b8a;
@@ -49,17 +49,21 @@ contract ERC721FungiblesRegistry {
     }
 
     function transfer(ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
-        require(composableRegistry.ownerOf(toErc721, toTokenId) != 0);
+        require(exists(toErc721, toTokenId));
         require(erc20.transferFrom(msg.sender, this, amount));
         balances[toErc721][toTokenId][erc20] += amount;
     }
 
     function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
         require(composableRegistry.ownerOf(fromErc721, fromTokenId) == msg.sender);
-        require(composableRegistry.ownerOf(toErc721, toTokenId) != 0);
+        require(exists(toErc721, toTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         balances[toErc721][toTokenId][erc20] += amount;
+    }
+
+    function exists(ERC721 erc721, uint tokenId) private view returns (bool) {
+        return erc721.ownerOf(tokenId) != 0;
     }
 
     function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public {
