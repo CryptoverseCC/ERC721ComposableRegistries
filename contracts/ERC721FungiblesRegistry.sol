@@ -13,7 +13,7 @@ contract ERC721FungiblesRegistry {
     ERC721ComposableRegistry public composableRegistry;
     mapping (address => mapping (uint => mapping (address => uint))) private balances;
 
-    function ERC721FungiblesRegistry(ERC721ComposableRegistry cr) public {
+    constructor(ERC721ComposableRegistry cr) public {
         composableRegistry = cr;
     }
 
