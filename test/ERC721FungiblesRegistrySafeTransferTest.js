@@ -32,6 +32,20 @@ contract('ERC721FungiblesRegistry', (accounts) => {
     });
 });
 
+contract('ERC721FungiblesRegistry', (accounts) => {
+
+    it("My token's balance is increased after approveAndCall", async () => {
+        const registry = await ERC721FungiblesRegistry.deployed();
+        const erc20 = await SampleERC20.deployed();
+        const erc721 = await SampleERC721.deployed();
+        await erc721.create();
+        const to = formatToByteArray(erc721.address, 1);
+        await erc20.approveAndCall(registry.address, 50, to);
+        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        assert.equal(balance, 50);
+    });
+});
+
 function formatToByteArray(toErc721, toTokenId) {
     return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
 }
