@@ -260,9 +260,6 @@ contract KittyOwnership is KittyBase, ERC721 {
     ///  ERC-165 (obviously!) and ERC-721.
     function supportsInterface(bytes4 _interfaceID) external view returns (bool)
     {
-        // DEBUG ONLY
-        //require((InterfaceSignature_ERC165 == 0x01ffc9a7) && (InterfaceSignature_ERC721 == 0x9a20483d));
-
         return ((_interfaceID == InterfaceSignature_ERC165) || (_interfaceID == InterfaceSignature_ERC721));
     }
 
@@ -424,46 +421,6 @@ contract KittyOwnership is KittyBase, ERC721 {
 
             return result;
         }
-    }
-
-    /// @dev Adapted from memcpy() by @arachnid (Nick Johnson <arachnid@notdot.net>)
-    ///  This method is licenced under the Apache License.
-    ///  Ref: https://github.com/Arachnid/solidity-stringutils/blob/2f6ca9accb48ae14c66f1437ec50ed19a0616f78/strings.sol
-    function _memcpy(uint _dest, uint _src, uint _len) private view {
-        // Copy word-length chunks while possible
-        for(; _len >= 32; _len -= 32) {
-            assembly {
-                mstore(_dest, mload(_src))
-            }
-            _dest += 32;
-            _src += 32;
-        }
-
-        // Copy remaining bytes
-        uint256 mask = 256 ** (32 - _len) - 1;
-        assembly {
-            let srcpart := and(mload(_src), not(mask))
-            let destpart := and(mload(_dest), mask)
-            mstore(_dest, or(destpart, srcpart))
-        }
-    }
-
-    /// @dev Adapted from toString(slice) by @arachnid (Nick Johnson <arachnid@notdot.net>)
-    ///  This method is licenced under the Apache License.
-    ///  Ref: https://github.com/Arachnid/solidity-stringutils/blob/2f6ca9accb48ae14c66f1437ec50ed19a0616f78/strings.sol
-    function _toString(bytes32[4] _rawBytes, uint256 _stringLength) private view returns (string) {
-        var outputString = new string(_stringLength);
-        uint256 outputPtr;
-        uint256 bytesPtr;
-
-        assembly {
-            outputPtr := add(outputString, 32)
-            bytesPtr := _rawBytes
-        }
-
-        _memcpy(outputPtr, bytesPtr, _stringLength);
-
-        return outputString;
     }
 }
 
