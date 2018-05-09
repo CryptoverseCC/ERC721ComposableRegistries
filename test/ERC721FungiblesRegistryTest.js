@@ -1,261 +1,142 @@
-const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
+const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
 const SampleERC20 = artifacts.require("SampleERC20.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
 
 contract('ERC721FungiblesRegistry', (accounts) => {
 
+    beforeEach(async () => {
+        this.composableRegistry = await ERC721ComposableRegistry.new();
+        this.registry = await ERC721FungiblesRegistry.new(this.composableRegistry.address);
+        this.erc20 = await SampleERC20.new();
+        await this.erc20.approve(this.registry.address, 999);
+        this.erc721 = await SampleERC721.new();
+        await this.erc721.create();
+        await this.erc721.create();
+        await this.erc721.create({from: accounts[1]});
+        await this.erc721.setApprovalForAll(this.composableRegistry.address, true);
+    });
+
     it("My token has zero balance", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 0);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token has non-zero balance", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 50);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token's balance is increased", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 20);
-        await registry.transfer(erc721.address, 1, erc20.address, 20);
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 20);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 20);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 40);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My other token's balance stays zero", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        const balance = await registry.balanceOf(erc721.address, 2, erc20.address);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        const balance = await this.registry.balanceOf(this.erc721.address, 2, this.erc20.address);
         assert.equal(balance, 0);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token can transfer to other token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 20);
-        const balance = await registry.balanceOf(erc721.address, 2, erc20.address);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 20);
+        const balance = await this.registry.balanceOf(this.erc721.address, 2, this.erc20.address);
         assert.equal(balance, 20);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token's balance is decreased", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 20);
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 20);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 30);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token cannot transfer more than it owns", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
         try {
-            await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 51);
+            await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 51);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("I cannot transfer from his token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create({from: accounts[1]});
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        await this.registry.transfer(this.erc721.address, 3, this.erc20.address, 50);
         try {
-            await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 20);
+            await this.registry.transferFrom(this.erc721.address, 3, this.erc721.address, 1, this.erc20.address, 20);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("Token of my token can transfer", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const composableRegistry = await ERC721ComposableRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await erc721.create();
-        await erc721.approve(composableRegistry.address, 1);
-        await composableRegistry.transfer(erc721.address, 2, erc721.address, 1);
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        await registry.transferFrom(erc721.address, 1, erc721.address, 2, erc20.address, 20);
-        const balance = await registry.balanceOf(erc721.address, 2, erc20.address);
+        await this.composableRegistry.transfer(this.erc721.address, 2, this.erc721.address, 1);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 20);
+        const balance = await this.registry.balanceOf(this.erc721.address, 2, this.erc20.address);
         assert.equal(balance, 20);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token can transfer to address", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        await registry.transferToAddress(erc721.address, 1, accounts[1], erc20.address, 20);
-        const balance = await erc20.balanceOf(accounts[1]);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[1], this.erc20.address, 20);
+        const balance = await this.erc20.balanceOf(accounts[1]);
         assert.equal(balance, 20);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token's balance is decreased", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        await registry.transferToAddress(erc721.address, 1, accounts[1], erc20.address, 20);
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[1], this.erc20.address, 20);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 30);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token cannot transfer more than it owns", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
         try {
-            await registry.transferToAddress(erc721.address, 1, accounts[1], erc20.address, 51);
+            await this.registry.transferToAddress(this.erc721.address, 1, accounts[1], this.erc20.address, 51);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("I cannot transfer from his token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create({from: accounts[1]});
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        await this.registry.transfer(this.erc721.address, 3, this.erc20.address, 50);
         try {
-            await registry.transferToAddress(erc721.address, 1, accounts[1], erc20.address, 20);
+            await this.registry.transferToAddress(this.erc721.address, 3, accounts[1], this.erc20.address, 20);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("He can withdraw from his token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create({from: accounts[1]});
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
-        await registry.transferToAddress(erc721.address, 1, accounts[1], erc20.address, 20, {from: accounts[1]});
-        const balance = await erc20.balanceOf(accounts[1]);
+        await this.registry.transfer(this.erc721.address, 3, this.erc20.address, 50);
+        await this.registry.transferToAddress(this.erc721.address, 3, accounts[1], this.erc20.address, 20, {from: accounts[1]});
+        const balance = await this.erc20.balanceOf(accounts[1]);
         assert.equal(balance, 20);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("I cannot transfer to non-existing token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
         try {
-            await registry.transfer(erc721.address, 6, erc20.address, 50);
+            await this.registry.transfer(this.erc721.address, 6, this.erc20.address, 50);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token cannot transfer to non-existing token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        await erc20.approve(registry.address, 999);
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await registry.transfer(erc721.address, 1, erc20.address, 50);
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
         try {
-            await registry.transferFrom(erc721.address, 1, erc721.address, 6, erc20.address, 20);
+            await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 6, this.erc20.address, 20);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;

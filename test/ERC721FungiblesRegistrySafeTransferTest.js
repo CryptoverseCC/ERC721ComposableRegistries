@@ -1,47 +1,39 @@
+const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
 const SampleERC20 = artifacts.require("SampleERC20.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
 
 contract('ERC721FungiblesRegistry', (accounts) => {
 
+    beforeEach(async () => {
+        this.composableRegistry = await ERC721ComposableRegistry.new();
+        this.registry = await ERC721FungiblesRegistry.new(this.composableRegistry.address);
+        this.erc20 = await SampleERC20.new();
+        this.erc721 = await SampleERC721.new();
+        await this.erc721.create();
+    });
+
     it("My token's balance is increased after safe transfer", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        const to = formatToByteArray(erc721.address, 1);
-        await erc20.transferAndCall(registry.address, 50, to);
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        const to = formatToByteArray(this.erc721.address, 1);
+        await this.erc20.transferAndCall(this.registry.address, 50, to);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 50);
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("Cannot transfer to non-existing token", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        const erc721 = await SampleERC721.deployed();
-        const to = formatToByteArray(erc721.address, 6);
+        const to = formatToByteArray(this.erc721.address, 6);
         try {
-            await erc20.transferAndCall(registry.address, 50, to);
+            await this.erc20.transferAndCall(this.registry.address, 50, to);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
-});
-
-contract('ERC721FungiblesRegistry', (accounts) => {
 
     it("My token's balance is increased after approveAndCall", async () => {
-        const registry = await ERC721FungiblesRegistry.deployed();
-        const erc20 = await SampleERC20.deployed();
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        const to = formatToByteArray(erc721.address, 1);
-        await erc20.approveAndCall(registry.address, 50, to);
-        const balance = await registry.balanceOf(erc721.address, 1, erc20.address);
+        const to = formatToByteArray(this.erc721.address, 1);
+        await this.erc20.approveAndCall(this.registry.address, 50, to);
+        const balance = await this.registry.balanceOf(this.erc721.address, 1, this.erc20.address);
         assert.equal(balance, 50);
     });
 });
