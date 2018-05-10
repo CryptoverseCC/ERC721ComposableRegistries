@@ -12,6 +12,7 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         await this.erc20.approve(this.registry.address, 999);
         this.erc721 = await SampleERC721.new();
         await this.erc721.create();
+        await this.erc721.create();
     });
 
     it("Transfer event is emitted after transfer to token", async () => {
@@ -19,10 +20,24 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         assert.equal(r.logs.length, 1);
         assert.equal(r.logs[0].event, 'ERC20Transfer');
         const args = r.logs[0].args;
-        console.log(args.from, accounts[0]);
-        console.log(args.toErc721, this.erc721.address);
-        console.log(args.toTokenId, 1);
-        console.log(args.erc20, this.erc20.address);
-        console.log(args.amount, 50);
+        assert.equal(args.from, accounts[0]);
+        assert.equal(args.toErc721, this.erc721.address);
+        assert.equal(args.toTokenId, 1);
+        assert.equal(args.erc20, this.erc20.address);
+        assert.equal(args.amount, 50);
+    });
+
+    it("Transfer event is emitted after transfer from token to token", async () => {
+        await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
+        const r = await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 20);
+        assert.equal(r.logs.length, 1);
+        assert.equal(r.logs[0].event, 'ERC20Transfer');
+        const args = r.logs[0].args;
+        assert.equal(args.fromErc721, this.erc721.address);
+        assert.equal(args.fromTokenId, 1);
+        assert.equal(args.toErc721, this.erc721.address);
+        assert.equal(args.toTokenId, 2);
+        assert.equal(args.erc20, this.erc20.address);
+        assert.equal(args.amount, 20);
     });
 });
