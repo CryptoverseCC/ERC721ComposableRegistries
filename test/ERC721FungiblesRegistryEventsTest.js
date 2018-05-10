@@ -1,3 +1,5 @@
+const keccak = require('js-sha3').keccak_256;
+
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
 const SampleERC20 = artifacts.require("SampleERC20.sol");
@@ -53,4 +55,30 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         assert.equal(args.erc20, this.erc20.address);
         assert.equal(args.amount, 30);
     });
+
+    it("Transfer event is emitted after safe transfer", async () => {
+        const to = formatToByteArray(this.erc721.address, 1);
+        const r = await this.erc20.transferAndCall(this.registry.address, 50, to);
+        assert.equal(r.receipt.logs.length, 2);
+        const l = r.receipt.logs[1];
+        assert.equal(l.topics.length, 1);
+        assert.equal(l.topics[0], '0x' + keccak('ERC20Transfer(address,address,uint256,address,uint256)'));
+        assert.equal(addressAtIndex(l.data, 0), accounts[0]);
+        assert.equal(addressAtIndex(l.data, 1), this.erc721.address);
+        assert.equal(intAtIndex(l.data, 2), 1);
+        assert.equal(addressAtIndex(l.data, 3), this.erc20.address);
+        assert.equal(intAtIndex(l.data, 4), 50);
+    });
 });
+
+function formatToByteArray(toErc721, toTokenId) {
+    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
+}
+
+function addressAtIndex(data, index) {
+    return '0x' + data.substring(2 + 64 * index + 24, 2 + 64 * (index + 1));
+}
+
+function intAtIndex(data, index) {
+    return parseInt(data.substring(2 + 64 * index, 2 + 64 * (index + 1)), 16);
+}
