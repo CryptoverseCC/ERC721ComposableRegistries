@@ -12,6 +12,7 @@ contract ERC721FungiblesRegistry {
 
     event ERC20Transfer(address from, address toErc721, uint toTokenId, address erc20, uint amount);
     event ERC20Transfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, address erc20, uint amount);
+    event ERC20Transfer(address fromErc721, uint fromTokenId, address to, address erc20, uint amount);
 
     ERC721ComposableRegistry public composableRegistry;
     mapping (address => mapping (uint => mapping (address => uint))) private balances;
@@ -76,6 +77,7 @@ contract ERC721FungiblesRegistry {
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         assert(erc20.transfer(to, amount));
+        emit ERC20Transfer(fromErc721, fromTokenId, to, erc20, amount);
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {
