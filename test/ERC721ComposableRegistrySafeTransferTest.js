@@ -96,8 +96,9 @@ async function safeTransferFrom(from, registryAddress, toErc721, toTokenId, whic
 }
 
 async function safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId) {
+    const safeTransferFromFunc = SampleERC721.abi.find(f => f.name === 'safeTransferFrom' && f.inputs.length === 4);
     const transferMethodTransactionData = web3Abi.encodeFunctionCall(
-        SampleERC721.abi[13], [from, registryAddress, whichTokenId, to]
+        safeTransferFromFunc, [from, registryAddress, whichTokenId, to]
     );
     await web3.eth.sendTransaction({
         from, to: whichErc721, data: transferMethodTransactionData, value: 0, gas: 500000
