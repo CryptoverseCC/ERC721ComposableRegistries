@@ -51,6 +51,7 @@ contract ERC721ComposableRegistry {
         require(exists(toErc721, toTokenId));
         for (uint i = 0; i < whichErc721s.length; i++) {
             require(ownerOf(whichErc721s[i], whichTokenIds[i]) == msg.sender);
+            requireNoCircularDependency(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
             transferImpl(this, whichErc721s[i], whichTokenIds[i]);
             removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
             add(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);

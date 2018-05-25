@@ -59,4 +59,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("Cannot transfer to child token", async () => {
+        await this.registry.transfer(this.erc721.address, 3, this.erc721.address, 1);
+        try {
+            await this.registry.multiTransfer(this.erc721.address, 1, [this.erc721.address, this.erc721.address], [2, 3]);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
