@@ -47,6 +47,12 @@ contract ERC721ComposableRegistry {
         add(toErc721, toTokenId, whichErc721, whichTokenId);
     }
 
+    function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
+        for (uint i = 0; i < whichErc721s.length; i++) {
+            add(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
+        }
+    }
+
     function exists(ERC721 erc721, uint tokenId) private view returns (bool) {
         return erc721.ownerOf(tokenId) != 0;
     }
