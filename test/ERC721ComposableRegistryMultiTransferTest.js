@@ -31,4 +31,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(children[0].length, 0);
         assert.equal(children[1].length, 0);
     });
+
+    it("Cannot transfer to non-existing token", async () => {
+        try {
+            await this.registry.multiTransfer(this.erc721.address, 6, [this.erc721.address, this.erc721.address], [2, 3]);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
