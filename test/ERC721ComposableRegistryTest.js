@@ -11,6 +11,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await this.erc721.create();
         await this.erc721.setApprovalForAll(this.registry.address, true);
         await this.erc721.create({from: accounts[1]});
+        await this.erc721.setApprovalForAll(this.registry.address, true, {from: accounts[1]});
     });
 
     it("I'm owner of my token", async () => {
