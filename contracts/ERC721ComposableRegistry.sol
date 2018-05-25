@@ -87,6 +87,7 @@ contract ERC721ComposableRegistry {
 
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {
         for (uint i = 0; i < whichErc721s.length; i++) {
+            require(ownerOf(whichErc721s[i], whichTokenIds[i]) == msg.sender);
             transferImpl(to, whichErc721s[i], whichTokenIds[i]);
             removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
             delete childToParent[whichErc721s[i]][whichTokenIds[i]];

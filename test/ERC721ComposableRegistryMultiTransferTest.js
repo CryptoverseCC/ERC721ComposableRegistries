@@ -86,4 +86,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(children[0].length, 0);
         assert.equal(children[1].length, 0);
     });
+
+    it("Cannot transfer from his token", async () => {
+        await this.registry.multiTransfer(this.erc721.address, 5, [this.erc721.address, this.erc721.address], [2, 3]);
+        try {
+            await this.registry.multiTransferToAddress(accounts[1], [this.erc721.address, this.erc721.address], [2, 3]);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
