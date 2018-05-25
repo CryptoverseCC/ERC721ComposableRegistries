@@ -85,6 +85,13 @@ contract ERC721ComposableRegistry {
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];
     }
 
+    function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {
+        for (uint i = 0; i < whichErc721s.length; i++) {
+            transferImpl(to, whichErc721s[i], whichTokenIds[i]);
+            delete childToParent[whichErc721s[i]][whichTokenIds[i]];
+        }
+    }
+
     function transferImpl(address to, ERC721 whichErc721, uint whichTokenId) private {
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
         address(whichErc721).call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);

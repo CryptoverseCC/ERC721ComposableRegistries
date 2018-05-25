@@ -69,4 +69,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I am not owner of tokens I sent to him", async () => {
+        await this.registry.multiTransfer(this.erc721.address, 1, [this.erc721.address, this.erc721.address], [2, 3]);
+        await this.registry.multiTransferToAddress(accounts[1], [this.erc721.address, this.erc721.address], [2, 3]);
+        const ownerOfTokenTwo = await this.registry.ownerOf(this.erc721.address, 2);
+        const ownerOfTokenThree = await this.registry.ownerOf(this.erc721.address, 3);
+        assert.equal(ownerOfTokenTwo, accounts[1]);
+        assert.equal(ownerOfTokenThree, accounts[1]);
+    });
 });
