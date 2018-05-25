@@ -49,6 +49,7 @@ contract ERC721ComposableRegistry {
 
     function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
         for (uint i = 0; i < whichErc721s.length; i++) {
+            removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
             add(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
         }
     }
