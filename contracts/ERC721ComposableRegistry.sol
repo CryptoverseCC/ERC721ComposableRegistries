@@ -50,6 +50,7 @@ contract ERC721ComposableRegistry {
     function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
         require(exists(toErc721, toTokenId));
         for (uint i = 0; i < whichErc721s.length; i++) {
+            require(ownerOf(whichErc721s[i], whichTokenIds[i]) == msg.sender);
             transferImpl(this, whichErc721s[i], whichTokenIds[i]);
             removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
             add(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);

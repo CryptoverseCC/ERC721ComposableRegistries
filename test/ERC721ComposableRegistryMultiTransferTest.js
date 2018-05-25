@@ -11,6 +11,8 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await this.erc721.create();
         await this.erc721.create();
         await this.erc721.setApprovalForAll(this.registry.address, true);
+        await this.erc721.create({from: accounts[1]});
+        await this.erc721.setApprovalForAll(this.registry.address, true, {from: accounts[1]});
     });
 
     it("Token has two tokens after multi transfer", async () => {
@@ -47,5 +49,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const ownerOfTokenThree = await this.erc721.ownerOf(3);
         assert.equal(ownerOfTokenTwo, this.registry.address);
         assert.equal(ownerOfTokenThree, this.registry.address);
+    });
+
+    it("Cannot transfer his token", async () => {
+        try {
+            await this.registry.multiTransfer(this.erc721.address, 1, [this.erc721.address], [5]);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
     });
 });
