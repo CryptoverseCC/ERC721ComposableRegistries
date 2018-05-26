@@ -85,10 +85,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(owner, accounts[1]);
     });
 
-    it("I can transfer to address token I own directly", async () => {
-        await this.registry.transferToAddress(accounts[1], this.erc721.address, 1);
-        const owner = await this.registry.ownerOf(this.erc721.address, 1);
-        assert.equal(owner, accounts[1]);
+    it("I cannot transfer to address token I own directly", async () => {
+        try {
+            await this.registry.transferToAddress(accounts[1], this.erc721.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
     });
 
     it("Cannot transfer parent to be child of its child", async () => {
