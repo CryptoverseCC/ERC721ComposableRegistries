@@ -8,6 +8,8 @@ contract ERC721 {
 
 contract ERC721ComposableRegistry {
 
+    event ERC721Transfer(address from, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
+
     mapping (address => mapping (uint => TokenIdentifier)) childToParent;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
     mapping (address => mapping (uint => uint)) childToIndexInParentToChildren;
@@ -45,6 +47,7 @@ contract ERC721ComposableRegistry {
         transferImpl(this, whichErc721, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         add(toErc721, toTokenId, whichErc721, whichTokenId);
+        emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
     }
 
     function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
