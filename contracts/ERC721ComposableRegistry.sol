@@ -9,6 +9,7 @@ contract ERC721 {
 contract ERC721ComposableRegistry {
 
     event ERC721Transfer(address from, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
+    event ERC721Transfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
 
     mapping (address => mapping (uint => TokenIdentifier)) childToParent;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
@@ -45,9 +46,14 @@ contract ERC721ComposableRegistry {
         require(exists(toErc721, toTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
+        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
         add(toErc721, toTokenId, whichErc721, whichTokenId);
-        emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
+        if (parent.erc721 == ERC721(0)) {
+            emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
+        } else {
+            emit ERC721Transfer(parent.erc721, parent.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
+        }
     }
 
     function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
