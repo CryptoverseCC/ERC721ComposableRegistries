@@ -17,4 +17,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(parent[0], this.erc721.address);
         assert.equal(parent[1], 1);
     });
+
+    it("Checking parent when not owned by registry should fail", async () => {
+        try {
+            await this.registry.parent(this.erc721.address, 2);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
