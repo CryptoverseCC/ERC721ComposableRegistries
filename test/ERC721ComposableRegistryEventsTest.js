@@ -37,4 +37,17 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(args.whichErc721, this.erc721.address);
         assert.equal(args.whichTokenId, 2);
     });
+
+    it("Transfer event is emitted after transfer to address", async () => {
+        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
+        const r = await this.registry.transferToAddress(accounts[1], this.erc721.address, 2);
+        assert.equal(r.logs.length, 1);
+        assert.equal(r.logs[0].event, 'ERC721Transfer');
+        const args = r.logs[0].args;
+        assert.equal(args.fromErc721, this.erc721.address);
+        assert.equal(args.fromTokenId, 1);
+        assert.equal(args.to, accounts[1]);
+        assert.equal(args.whichErc721, this.erc721.address);
+        assert.equal(args.whichTokenId, 2);
+    });
 });

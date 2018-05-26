@@ -10,6 +10,7 @@ contract ERC721ComposableRegistry {
 
     event ERC721Transfer(address from, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
     event ERC721Transfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
+    event ERC721Transfer(address fromErc721, uint fromTokenId, address to, address whichErc721, uint whichTokenId);
 
     mapping (address => mapping (uint => TokenIdentifier)) childToParent;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
@@ -89,9 +90,11 @@ contract ERC721ComposableRegistry {
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         transferImpl(to, whichErc721, whichTokenId);
+        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];
+        emit ERC721Transfer(parent.erc721, parent.tokenId, to, whichErc721, whichTokenId);
     }
 
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {
