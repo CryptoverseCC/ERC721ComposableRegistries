@@ -10,7 +10,8 @@ contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721
         receiver.onERC721Received(0, tokenId, to);
     }
 
-    function transferFrom(address from, address to, uint tokenId) public {
-        require(false);
+    modifier canTransfer(uint) {
+        revert();
+        _;
     }
 }
