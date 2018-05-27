@@ -47,13 +47,13 @@ contract ERC721ComposableRegistry {
         require(exists(toErc721, toTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
-        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
+        TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
         add(toErc721, toTokenId, whichErc721, whichTokenId);
-        if (parent.erc721 == ERC721(0)) {
+        if (p.erc721 == ERC721(0)) {
             emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
         } else {
-            emit ERC721Transfer(parent.erc721, parent.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
+            emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
         }
     }
 
@@ -75,9 +75,9 @@ contract ERC721ComposableRegistry {
     function requireNoCircularDependency(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private view {
         do {
             require(toErc721 != whichErc721 || toTokenId != whichTokenId);
-            TokenIdentifier memory parent = childToParent[toErc721][toTokenId];
-            toErc721 = parent.erc721;
-            toTokenId = parent.tokenId;
+            TokenIdentifier memory p = childToParent[toErc721][toTokenId];
+            toErc721 = p.erc721;
+            toTokenId = p.tokenId;
         } while (toErc721 != ERC721(0));
     }
 
@@ -91,11 +91,11 @@ contract ERC721ComposableRegistry {
         require(whichErc721.ownerOf(whichTokenId) == address(this));
         require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         transferImpl(to, whichErc721, whichTokenId);
-        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
+        TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];
-        emit ERC721Transfer(parent.erc721, parent.tokenId, to, whichErc721, whichTokenId);
+        emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721, whichTokenId);
     }
 
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {
@@ -115,9 +115,9 @@ contract ERC721ComposableRegistry {
     }
 
     function removeFromParentToChildren(ERC721 whichErc721, uint whichTokenId) private {
-        TokenIdentifier memory parent = childToParent[whichErc721][whichTokenId];
-        if (parent.erc721 != ERC721(0)) {
-            TokenIdentifier[] storage c = parentToChildren[parent.erc721][parent.tokenId];
+        TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
+        if (p.erc721 != ERC721(0)) {
+            TokenIdentifier[] storage c = parentToChildren[p.erc721][p.tokenId];
             uint index = childToIndexInParentToChildren[whichErc721][whichTokenId];
             uint last = c.length - 1;
             if (index < last) {
@@ -128,19 +128,19 @@ contract ERC721ComposableRegistry {
     }
 
     function ownerOf(ERC721 erc721, uint tokenId) public view returns (address) {
-        TokenIdentifier memory parent = childToParent[erc721][tokenId];
-        while (parent.erc721 != ERC721(0)) {
-            erc721 = parent.erc721;
-            tokenId = parent.tokenId;
-            parent = childToParent[erc721][tokenId];
+        TokenIdentifier memory p = childToParent[erc721][tokenId];
+        while (p.erc721 != ERC721(0)) {
+            erc721 = p.erc721;
+            tokenId = p.tokenId;
+            p = childToParent[erc721][tokenId];
         }
         return erc721.ownerOf(tokenId);
     }
 
     function parent(ERC721 erc721, uint tokenId) public view returns (ERC721, uint) {
-        TokenIdentifier memory parent = childToParent[erc721][tokenId];
-        require(parent.erc721 != ERC721(0));
-        return (parent.erc721, parent.tokenId);
+        TokenIdentifier memory p = childToParent[erc721][tokenId];
+        require(p.erc721 != ERC721(0));
+        return (p.erc721, p.tokenId);
     }
 
     function children(ERC721 erc721, uint tokenId) public view returns (ERC721[], uint[]) {
