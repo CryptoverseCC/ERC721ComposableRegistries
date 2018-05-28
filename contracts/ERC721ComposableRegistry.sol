@@ -43,8 +43,23 @@ contract ERC721ComposableRegistry {
     }
 
     function transfer(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) public {
-        require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         require(exists(toErc721, toTokenId));
+        transferToExistingToken(toErc721, toTokenId, whichErc721, whichTokenId);
+    }
+
+    function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
+        require(exists(toErc721, toTokenId));
+        for (uint i = 0; i < whichErc721s.length; i++) {
+            transferToExistingToken(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
+        }
+    }
+
+    function exists(ERC721 erc721, uint tokenId) private view returns (bool) {
+        return erc721.ownerOf(tokenId) != 0;
+    }
+
+    function transferToExistingToken(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
+        require(ownerOf(whichErc721, whichTokenId) == msg.sender);
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
@@ -55,27 +70,6 @@ contract ERC721ComposableRegistry {
         } else {
             emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
         }
-    }
-
-    function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public {
-        require(exists(toErc721, toTokenId));
-        for (uint i = 0; i < whichErc721s.length; i++) {
-            require(ownerOf(whichErc721s[i], whichTokenIds[i]) == msg.sender);
-            requireNoCircularDependency(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
-            transferImpl(this, whichErc721s[i], whichTokenIds[i]);
-            TokenIdentifier memory p = childToParent[whichErc721s[i]][whichTokenIds[i]];
-            removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
-            add(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
-            if (p.erc721 != ERC721(0)) {
-                emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
-            } else {
-                emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
-            }
-        }
-    }
-
-    function exists(ERC721 erc721, uint tokenId) private view returns (bool) {
-        return erc721.ownerOf(tokenId) != 0;
     }
 
     function requireNoCircularDependency(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private view {
@@ -106,14 +100,7 @@ contract ERC721ComposableRegistry {
 
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {
         for (uint i = 0; i < whichErc721s.length; i++) {
-            require(whichErc721s[i].ownerOf(whichTokenIds[i]) == address(this));
-            require(ownerOf(whichErc721s[i], whichTokenIds[i]) == msg.sender);
-            transferImpl(to, whichErc721s[i], whichTokenIds[i]);
-            TokenIdentifier memory p = childToParent[whichErc721s[i]][whichTokenIds[i]];
-            removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
-            delete childToParent[whichErc721s[i]][whichTokenIds[i]];
-            delete childToIndexInParentToChildren[whichErc721s[i]][whichTokenIds[i]];
-            emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721s[i], whichTokenIds[i]);
+            transferToAddress(to, whichErc721s[i], whichTokenIds[i]);
         }
     }
 
