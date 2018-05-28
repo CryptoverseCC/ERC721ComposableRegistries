@@ -50,10 +50,10 @@ contract ERC721ComposableRegistry {
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
         add(toErc721, toTokenId, whichErc721, whichTokenId);
-        if (p.erc721 == ERC721(0)) {
-            emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
-        } else {
+        if (p.erc721 != ERC721(0)) {
             emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
+        } else {
+            emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
         }
     }
 
@@ -66,7 +66,11 @@ contract ERC721ComposableRegistry {
             TokenIdentifier memory p = childToParent[whichErc721s[i]][whichTokenIds[i]];
             removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
             add(toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
-            emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
+            if (p.erc721 != ERC721(0)) {
+                emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
+            } else {
+                emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721s[i], whichTokenIds[i]);
+            }
         }
     }
 
