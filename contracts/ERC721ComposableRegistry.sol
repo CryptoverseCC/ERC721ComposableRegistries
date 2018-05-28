@@ -109,9 +109,11 @@ contract ERC721ComposableRegistry {
             require(whichErc721s[i].ownerOf(whichTokenIds[i]) == address(this));
             require(ownerOf(whichErc721s[i], whichTokenIds[i]) == msg.sender);
             transferImpl(to, whichErc721s[i], whichTokenIds[i]);
+            TokenIdentifier memory p = childToParent[whichErc721s[i]][whichTokenIds[i]];
             removeFromParentToChildren(whichErc721s[i], whichTokenIds[i]);
             delete childToParent[whichErc721s[i]][whichTokenIds[i]];
             delete childToIndexInParentToChildren[whichErc721s[i]][whichTokenIds[i]];
+            emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721s[i], whichTokenIds[i]);
         }
     }
 
