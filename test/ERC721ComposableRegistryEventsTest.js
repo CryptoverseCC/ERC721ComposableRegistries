@@ -50,4 +50,23 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(args.whichErc721, this.erc721.address);
         assert.equal(args.whichTokenId, 2);
     });
+
+    it("Transfer events are emitted after multi transfer to token", async () => {
+        const r = await this.registry.multiTransfer(this.erc721.address, 1, [this.erc721.address, this.erc721.address], [2, 3]);
+        assert.equal(r.logs.length, 2);
+        assert.equal(r.logs[0].event, 'ERC721Transfer');
+        const args1 = r.logs[0].args;
+        assert.equal(args1.from, accounts[0]);
+        assert.equal(args1.toErc721, this.erc721.address);
+        assert.equal(args1.toTokenId, 1);
+        assert.equal(args1.whichErc721, this.erc721.address);
+        assert.equal(args1.whichTokenId, 2);
+        assert.equal(r.logs[1].event, 'ERC721Transfer');
+        const args2 = r.logs[1].args;
+        assert.equal(args2.from, accounts[0]);
+        assert.equal(args2.toErc721, this.erc721.address);
+        assert.equal(args2.toTokenId, 1);
+        assert.equal(args2.whichErc721, this.erc721.address);
+        assert.equal(args2.whichTokenId, 3);
+    });
 });
