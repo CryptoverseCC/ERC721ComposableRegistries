@@ -96,4 +96,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("Cannot multi transfer to address tokens owned directly", async () => {
+        try {
+            await this.registry.multiTransferToAddress(accounts[1], [this.erc721.address, this.erc721.address], [2, 3]);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
