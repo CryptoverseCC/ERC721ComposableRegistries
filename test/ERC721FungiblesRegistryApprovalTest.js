@@ -15,9 +15,7 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         await this.erc20.approve(this.registry.address, 100);
         this.erc721 = await SampleERC721.new();
         await this.erc721.create({from: accounts[1]});
-        await this.erc721.create();
         await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
-        await this.registry.transfer(this.erc721.address, 2, this.erc20.address, 50);
         this.robber = await Robber.new(this.registry.address);
     });
 
@@ -39,6 +37,8 @@ contract('ERC721FungiblesRegistry', (accounts) => {
     });
 
     it("Robber cannot steal erc20 from other token", async () => {
+        await this.erc721.create();
+        await this.registry.transfer(this.erc721.address, 2, this.erc20.address, 50);
         await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
         try {
             await this.robber.steal20(this.erc721.address, 2, this.erc20.address, 50);
