@@ -16,7 +16,7 @@ contract ERC721FungiblesRegistry {
 
     ERC721ComposableRegistry public composableRegistry;
     mapping (address => mapping (uint => mapping (address => uint))) private balances;
-    mapping (address => mapping (uint => mapping (address => mapping (address => uint)))) private approved;
+    mapping (address => mapping (address => mapping (uint => mapping (address => mapping (address => uint))))) private approved;
 
     constructor(ERC721ComposableRegistry cr) public {
         composableRegistry = cr;
@@ -75,16 +75,17 @@ contract ERC721FungiblesRegistry {
     }
 
     function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public {
-        require(composableRegistry.ownerOf(fromErc721, fromTokenId) == msg.sender || approved[fromErc721][fromTokenId][msg.sender][erc20] >= amount);
+        address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
+        require(owner == msg.sender || approved[owner][fromErc721][fromTokenId][msg.sender][erc20] >= amount);
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
-        approved[fromErc721][fromTokenId][msg.sender][erc20] -= amount;
+        approved[owner][fromErc721][fromTokenId][msg.sender][erc20] -= amount;
         assert(erc20.transfer(to, amount));
         emit ERC20Transfer(fromErc721, fromTokenId, to, erc20, amount);
     }
 
     function approve(ERC721 fromErc721, uint fromTokenId, address spender, ERC20 erc20, uint amount) public {
-        approved[fromErc721][fromTokenId][spender][erc20] = amount;
+        approved[msg.sender][fromErc721][fromTokenId][spender][erc20] = amount;
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {

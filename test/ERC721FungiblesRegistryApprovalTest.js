@@ -89,4 +89,14 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         const balance = await this.erc20.balanceOf(this.robber.address);
         assert.equal(balance.toNumber(), 40);
     });
+
+    it("Robber cannot steal erc20 when approved by non-owner", async () => {
+        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50);
+        try {
+            await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 50);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
