@@ -78,6 +78,7 @@ contract ERC721FungiblesRegistry {
         require(composableRegistry.ownerOf(fromErc721, fromTokenId) == msg.sender || approved[fromErc721][fromTokenId][msg.sender] >= amount);
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
+        approved[fromErc721][fromTokenId][msg.sender] = 0;
         assert(erc20.transfer(to, amount));
         emit ERC20Transfer(fromErc721, fromTokenId, to, erc20, amount);
     }
