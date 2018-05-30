@@ -81,4 +81,12 @@ contract('ERC721FungiblesRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("Robber can steal erc20 multiple times", async () => {
+        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
+        await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 20);
+        await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 20);
+        const balance = await this.erc20.balanceOf(this.robber.address);
+        assert.equal(balance.toNumber(), 40);
+    });
 });
