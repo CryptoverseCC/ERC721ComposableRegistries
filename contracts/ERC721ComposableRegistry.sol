@@ -91,13 +91,27 @@ contract ERC721ComposableRegistry {
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(whichErc721.ownerOf(whichTokenId) == address(this));
         address owner = ownerOf(whichErc721, whichTokenId);
-        require(owner == msg.sender || approved[owner][msg.sender][whichErc721][whichTokenId]);
+        require(owner == msg.sender || hasApproved(owner, whichErc721, whichTokenId));
         transferImpl(to, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];
         emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721, whichTokenId);
+    }
+
+    function hasApproved(address owner, ERC721 erc721, uint tokenId) private returns (bool) {
+        bool appr = approved[owner][msg.sender][erc721][tokenId];
+        while (!appr) {
+            TokenIdentifier memory p = childToParent[erc721][tokenId];
+            if (p.erc721 == ERC721(0)) {
+                break;
+            }
+            erc721 = p.erc721;
+            tokenId = p.tokenId;
+            appr = approved[owner][msg.sender][erc721][tokenId];
+        }
+        return appr;
     }
 
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {

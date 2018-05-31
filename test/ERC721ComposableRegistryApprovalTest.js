@@ -50,4 +50,11 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I can transfer when parent token is approved", async () => {
+        await this.registry.approve(accounts[0], this.erc721.address, 2, {from: accounts[1]});
+        await this.registry.transferToAddress(accounts[2], this.erc721.address, 3);
+        const owner = await this.registry.ownerOf(this.erc721.address, 3);
+        assert.equal(owner, accounts[2]);
+    });
 });
