@@ -8,8 +8,10 @@ contract('ERC721ComposableRegistry', (accounts) => {
         this.erc721 = await SampleERC721.new();
         await this.erc721.create({from: accounts[1]});
         await this.erc721.create();
+        await this.erc721.create();
         await this.erc721.setApprovalForAll(this.registry.address, true);
         await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
+        await this.registry.transfer(this.erc721.address, 2, this.erc721.address, 3);
     });
 
     it("I can transfer approved token", async () => {
@@ -31,6 +33,16 @@ contract('ERC721ComposableRegistry', (accounts) => {
 
     it("I cannot transfer when non-owner approves", async () => {
         await this.registry.approve(accounts[0], this.erc721.address, 2, {from: accounts[2]});
+        try {
+            await this.registry.transferToAddress(accounts[2], this.erc721.address, 2);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+
+    it("I cannot transfer when child token is approved", async () => {
+        await this.registry.approve(accounts[0], this.erc721.address, 3, {from: accounts[1]});
         try {
             await this.registry.transferToAddress(accounts[2], this.erc721.address, 2);
             assert.fail();
