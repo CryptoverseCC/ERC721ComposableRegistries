@@ -15,7 +15,7 @@ contract ERC721ComposableRegistry {
     mapping (address => mapping (uint => TokenIdentifier)) childToParent;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
     mapping (address => mapping (uint => uint)) childToIndexInParentToChildren;
-    bool approved;
+    mapping (address => bool) approved;
 
     struct TokenIdentifier {
         ERC721 erc721;
@@ -90,7 +90,7 @@ contract ERC721ComposableRegistry {
 
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(whichErc721.ownerOf(whichTokenId) == address(this));
-        require(ownerOf(whichErc721, whichTokenId) == msg.sender || approved);
+        require(ownerOf(whichErc721, whichTokenId) == msg.sender || approved[msg.sender]);
         transferImpl(to, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
@@ -125,7 +125,7 @@ contract ERC721ComposableRegistry {
     }
 
     function approve(address spender, ERC721 erc721, uint tokenId) public {
-        approved = true;
+        approved[spender] = true;
     }
 
     function ownerOf(ERC721 erc721, uint tokenId) public view returns (address) {
