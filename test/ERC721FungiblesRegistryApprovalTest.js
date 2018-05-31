@@ -4,7 +4,6 @@ const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol
 const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
 const SampleERC20 = artifacts.require("SampleERC20.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
-const Robber = artifacts.require("Robber.sol");
 
 contract('ERC721FungiblesRegistry', (accounts) => {
 
@@ -16,18 +15,17 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         this.erc721 = await SampleERC721.new();
         await this.erc721.create({from: accounts[1]});
         await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
-        this.robber = await Robber.new(this.registry.address);
     });
 
-    it("Robber can steal erc20 when approved", async () => {
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
-        await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 50);
-        const balance = await this.erc20.balanceOf(this.robber.address);
+    it("I can transfer erc20 when approved", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 50, {from: accounts[1]});
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[2], this.erc20.address, 50);
+        const balance = await this.erc20.balanceOf(accounts[2]);
         assert.equal(balance.toNumber(), 50);
     });
 
-    it("I cannot steal erc20 when robber is approved", async () => {
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
+    it("I cannot transfer erc20 when someone else is approved", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[2], this.erc20.address, 50, {from: accounts[1]});
         try {
             await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], this.erc20.address, 50);
             assert.fail();
@@ -36,64 +34,64 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         }
     });
 
-    it("Robber cannot steal erc20 from other token", async () => {
-        await this.erc721.create();
+    it("I cannot transfer erc20 from other token", async () => {
+        await this.erc721.create({from: accounts[1]});
         await this.registry.transfer(this.erc721.address, 2, this.erc20.address, 50);
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 50, {from: accounts[1]});
         try {
-            await this.robber.steal20(this.erc721.address, 2, this.erc20.address, 50);
+            await this.registry.transferToAddress(this.erc721.address, 2, accounts[0], this.erc20.address, 50);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 
-    it("Robber cannot steal more erc20 than approved", async () => {
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 25, {from: accounts[1]});
+    it("I cannot transfer more erc20 than approved", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 25, {from: accounts[1]});
         try {
-            await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 26);
+            await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], this.erc20.address, 26);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 
-    it("Robber cannot steal more erc20 than approved on second attempt", async () => {
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 25, {from: accounts[1]});
-        await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 25);
+    it("I cannot transfer more erc20 than approved on second attempt", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 25, {from: accounts[1]});
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], this.erc20.address, 25);
         try {
-            await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 1);
+            await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], this.erc20.address, 1);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 
-    it("Robber cannot steal different erc20", async () => {
+    it("I cannot transfer different erc20", async () => {
         const differentErc20 = await SampleERC20.new();
         await differentErc20.approve(this.registry.address, 100);
         await this.registry.transfer(this.erc721.address, 1, differentErc20.address, 100);
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 50, {from: accounts[1]});
         try {
-            await this.robber.steal20(this.erc721.address, 1, differentErc20.address, 50);
+            await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], differentErc20, 50);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
 
-    it("Robber can steal erc20 multiple times", async () => {
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50, {from: accounts[1]});
-        await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 20);
-        await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 20);
-        const balance = await this.erc20.balanceOf(this.robber.address);
+    it("I can transfer erc20 multiple times", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 50, {from: accounts[1]});
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[2], this.erc20.address, 20);
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[2], this.erc20.address, 20);
+        const balance = await this.erc20.balanceOf(accounts[2]);
         assert.equal(balance.toNumber(), 40);
     });
 
-    it("Robber cannot steal erc20 when approved by non-owner", async () => {
-        await this.registry.approve(this.erc721.address, 1, this.robber.address, this.erc20.address, 50);
+    it("I cannot transfer erc20 when approved by non-owner", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 50, {from: accounts[2]});
         try {
-            await this.robber.steal20(this.erc721.address, 1, this.erc20.address, 50);
+            await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], this.erc20.address, 50);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
