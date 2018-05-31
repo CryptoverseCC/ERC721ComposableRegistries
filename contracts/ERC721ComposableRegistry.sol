@@ -104,7 +104,7 @@ contract ERC721ComposableRegistry {
         bool appr = approved[owner][msg.sender][erc721][tokenId];
         while (!appr) {
             TokenIdentifier memory p = childToParent[erc721][tokenId];
-            if (p.erc721 == ERC721(0)) {
+            if (childToParent[p.erc721][p.tokenId].erc721 == ERC721(0)) {
                 break;
             }
             erc721 = p.erc721;
