@@ -104,17 +104,17 @@ contract ERC721ComposableRegistry {
     }
 
     function hasApproved(address owner, ERC721 erc721, uint tokenId) private view returns (bool) {
-        bool appr = approved[owner][msg.sender][erc721][tokenId];
-        while (!appr) {
-            TokenIdentifier memory p = childToParent[erc721][tokenId];
-            if (childToParent[p.erc721][p.tokenId].erc721 == ERC721(0)) {
-                return p.erc721.getApproved(p.tokenId) == msg.sender || p.erc721.isApprovedForAll(owner, msg.sender);
+        TokenIdentifier memory p = childToParent[erc721][tokenId];
+        while (true) {
+            if (p.erc721 == ERC721(0)) {
+                return erc721.getApproved(tokenId) == msg.sender || erc721.isApprovedForAll(owner, msg.sender);
+            } else if (approved[owner][msg.sender][erc721][tokenId]) {
+                return true;
             }
             erc721 = p.erc721;
             tokenId = p.tokenId;
-            appr = approved[owner][msg.sender][erc721][tokenId];
+            p = childToParent[erc721][tokenId];
         }
-        return appr;
     }
 
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public {
