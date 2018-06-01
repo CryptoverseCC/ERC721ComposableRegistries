@@ -102,12 +102,12 @@ contract ERC721ComposableRegistry {
         emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721, whichTokenId);
     }
 
-    function hasApproved(address owner, ERC721 erc721, uint tokenId) private returns (bool) {
+    function hasApproved(address owner, ERC721 erc721, uint tokenId) private view returns (bool) {
         bool appr = approved[owner][msg.sender][erc721][tokenId];
         while (!appr) {
             TokenIdentifier memory p = childToParent[erc721][tokenId];
             if (childToParent[p.erc721][p.tokenId].erc721 == ERC721(0)) {
-                return p.erc721.getApproved(p.tokenId) != 0 || p.erc721.isApprovedForAll(owner, msg.sender);
+                return p.erc721.getApproved(p.tokenId) == msg.sender || p.erc721.isApprovedForAll(owner, msg.sender);
             }
             erc721 = p.erc721;
             tokenId = p.tokenId;
