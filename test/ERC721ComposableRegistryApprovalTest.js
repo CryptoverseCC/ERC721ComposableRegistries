@@ -131,4 +131,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I cannot transfer when someone else approved me for all", async () => {
+        await this.registry.approveAll(accounts[0], {from: accounts[2]});
+        try {
+            await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
