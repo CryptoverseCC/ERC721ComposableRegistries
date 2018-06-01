@@ -179,4 +179,17 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I can transfer child when approved for type of parent", async () => {
+        const differentErc721 = await SampleERC721.new();
+        await differentErc721.create();
+        await differentErc721.setApprovalForAll(this.registry.address, true);
+        await this.erc721.create();
+        await this.registry.transfer(this.erc721.address, 1, differentErc721.address, 1);
+        await this.registry.transfer(differentErc721.address, 1, this.erc721.address, 5);
+        await this.registry.approveType(accounts[0], differentErc721.address, {from: accounts[1]});
+        await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 5);
+        const owner = await this.registry.ownerOf(this.erc721.address, 5);
+        assert.equal(owner, accounts[2]);
+    });
 });
