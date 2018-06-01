@@ -5,6 +5,7 @@ contract ERC721 {
     function ownerOf(uint tokenId) public view returns (address);
     function transferFrom(address from, address to, uint tokenId) public;
     function getApproved(uint tokenId) public view returns (address);
+    function isApprovedForAll(address owner, address operator) public view returns (bool);
 }
 
 contract ERC721ComposableRegistry {
@@ -106,7 +107,7 @@ contract ERC721ComposableRegistry {
         while (!appr) {
             TokenIdentifier memory p = childToParent[erc721][tokenId];
             if (childToParent[p.erc721][p.tokenId].erc721 == ERC721(0)) {
-                return p.erc721.getApproved(p.tokenId) != 0;
+                return p.erc721.getApproved(p.tokenId) != 0 || p.erc721.isApprovedForAll(owner, msg.sender);
             }
             erc721 = p.erc721;
             tokenId = p.tokenId;
