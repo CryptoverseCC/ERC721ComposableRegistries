@@ -62,7 +62,8 @@ contract ERC721ComposableRegistry {
     }
 
     function transferToExistingToken(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
-        require(ownerOf(whichErc721, whichTokenId) == msg.sender);
+        address owner = ownerOf(whichErc721, whichTokenId);
+        require(owner == msg.sender || approved[owner][msg.sender][whichErc721][whichTokenId]);
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];

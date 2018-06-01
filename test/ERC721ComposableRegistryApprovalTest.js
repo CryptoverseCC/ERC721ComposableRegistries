@@ -9,6 +9,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await this.erc721.create({from: accounts[1]});
         await this.erc721.create();
         await this.erc721.create();
+        await this.erc721.create({from: accounts[2]});
         await this.erc721.setApprovalForAll(this.registry.address, true);
         await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         await this.registry.transfer(this.erc721.address, 2, this.erc721.address, 3);
@@ -90,5 +91,12 @@ contract('ERC721ComposableRegistry', (accounts) => {
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
+    });
+
+    it("I can transfer approved token to token", async () => {
+        await this.registry.approve(accounts[0], this.erc721.address, 2, {from: accounts[1]});
+        await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
+        const owner = await this.registry.ownerOf(this.erc721.address, 2);
+        assert.equal(owner, accounts[2]);
     });
 });
