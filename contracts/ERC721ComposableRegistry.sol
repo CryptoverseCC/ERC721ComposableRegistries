@@ -18,6 +18,7 @@ contract ERC721ComposableRegistry {
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
     mapping (address => mapping (uint => uint)) childToIndexInParentToChildren;
     mapping (address => mapping (address => mapping (address => mapping (uint => bool)))) approved;
+    bool approvedType;
     mapping (address => mapping (address => bool)) approvedAll;
 
     struct TokenIdentifier {
@@ -64,7 +65,7 @@ contract ERC721ComposableRegistry {
 
     function transferToExistingToken(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
         address owner = ownerOf(whichErc721, whichTokenId);
-        require(owner == msg.sender || approvedAll[owner][msg.sender] || hasApproved(owner, whichErc721, whichTokenId));
+        require(owner == msg.sender || approvedAll[owner][msg.sender] || approvedType || hasApproved(owner, whichErc721, whichTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
@@ -145,6 +146,10 @@ contract ERC721ComposableRegistry {
 
     function approve(address spender, ERC721 erc721, uint tokenId) public {
         approved[msg.sender][spender][erc721][tokenId] = true;
+    }
+
+    function approveType(address spender, ERC721 erc721) public {
+        approvedType = true;
     }
 
     function approveAll(address spender) public {
