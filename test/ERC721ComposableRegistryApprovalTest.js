@@ -168,4 +168,15 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I cannot transfer when approved for different type", async () => {
+        const differentErc721 = await SampleERC721.new();
+        await this.registry.approveType(accounts[0], differentErc721.address, {from: accounts[1]});
+        try {
+            await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
