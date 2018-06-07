@@ -118,7 +118,6 @@ contract('ERC721ComposableRegistry', (accounts) => {
 
     it("Transfer event is emitted after safe transfer", async () => {
         const r = safeTransferFrom(accounts[0], this.registry.address, this.erc721.address, 1, this.erc721.address, 2);
-        console.log(r);
         assert.equal(r.logs.length, 2);
         const l = r.logs[1];
         assert.equal(l.topics.length, 1);
