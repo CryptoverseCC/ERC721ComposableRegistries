@@ -68,6 +68,7 @@ contract ERC721FungiblesRegistry {
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         balances[toErc721][toTokenId][erc20] += amount;
+        approved[owner][fromErc721][fromTokenId][msg.sender][erc20] -= amount;
         emit ERC20Transfer(fromErc721, fromTokenId, toErc721, toTokenId, erc20, amount);
     }
 
