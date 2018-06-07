@@ -14,6 +14,7 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         await this.erc20.approve(this.registry.address, 100);
         this.erc721 = await SampleERC721.new();
         await this.erc721.create({from: accounts[1]});
+        await this.erc721.create({from: accounts[1]});
         await this.registry.transfer(this.erc721.address, 1, this.erc20.address, 50);
     });
 
@@ -96,5 +97,12 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
+    });
+
+    it("I can transfer erc20 to other token when approved", async () => {
+        await this.registry.approve(this.erc721.address, 1, accounts[0], this.erc20.address, 50, {from: accounts[1]});
+        await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 50);
+        const balance = await this.registry.balanceOf(this.erc721.address, 2, this.erc20.address);
+        assert.equal(balance.toNumber(), 50);
     });
 });
