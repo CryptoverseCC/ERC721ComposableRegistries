@@ -1,3 +1,6 @@
+const web3Abi = require('web3-eth-abi');
+const keccak = require('js-sha3').keccak_256;
+
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
 
@@ -112,4 +115,46 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(args2.whichErc721, this.erc721.address);
         assert.equal(args2.whichTokenId, 3);
     });
+
+    it("Transfer event is emitted after safe transfer", async () => {
+        const r = safeTransferFrom(accounts[0], this.registry.address, this.erc721.address, 1, this.erc721.address, 2);
+        console.log(r);
+        assert.equal(r.logs.length, 2);
+        const l = r.logs[1];
+        assert.equal(l.topics.length, 1);
+        assert.equal(l.topics[0], '0x' + keccak('ERC721Transfer(address,address,uint256,address,uint256)'));
+        assert.equal(addressAtIndex(l.data, 0), accounts[0]);
+        assert.equal(addressAtIndex(l.data, 1), this.erc721.address);
+        assert.equal(intAtIndex(l.data, 2), 1);
+        assert.equal(addressAtIndex(l.data, 3), this.erc721.address);
+        assert.equal(intAtIndex(l.data, 4), 2);
+    });
 });
+
+function safeTransferFrom(from, registryAddress, toErc721, toTokenId, whichErc721, whichTokenId) {
+    const to = formatToByteArray(toErc721, toTokenId);
+    return safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId);
+}
+
+function safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId) {
+    const safeTransferFromFunc = SampleERC721.abi.find(f => f.name === 'safeTransferFrom' && f.inputs.length === 4);
+    const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+        safeTransferFromFunc, [from, registryAddress, whichTokenId, to]
+    );
+    const txHash = web3.eth.sendTransaction({
+        from, to: whichErc721, data: transferMethodTransactionData, value: 0, gas: 500000
+    });
+    return web3.eth.getTransactionReceipt(txHash);
+}
+
+function formatToByteArray(toErc721, toTokenId) {
+    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
+}
+
+function addressAtIndex(data, index) {
+    return '0x' + data.substring(2 + 64 * index + 24, 2 + 64 * (index + 1));
+}
+
+function intAtIndex(data, index) {
+    return parseInt(data.substring(2 + 64 * index, 2 + 64 * (index + 1)), 16);
+}

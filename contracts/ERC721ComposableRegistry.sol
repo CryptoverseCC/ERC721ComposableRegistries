@@ -26,7 +26,7 @@ contract ERC721ComposableRegistry {
         uint tokenId;
     }
 
-    function onERC721Received(address /* from */, uint whichTokenId, bytes to) public returns (bytes4) {
+    function onERC721Received(address from, uint whichTokenId, bytes to) public returns (bytes4) {
         require(to.length == 64);
         ERC721 whichErc721 = ERC721(msg.sender);
         require(ownerOf(whichErc721, whichTokenId) == address(this));
@@ -35,6 +35,7 @@ contract ERC721ComposableRegistry {
         require(exists(toErc721, toTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         add(toErc721, toTokenId, whichErc721, whichTokenId);
+        emit ERC721Transfer(from, toErc721, toTokenId, whichErc721, whichTokenId);
         return 0xf0b9e5ba;
     }
 
