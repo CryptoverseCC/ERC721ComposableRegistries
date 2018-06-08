@@ -130,4 +130,11 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         const balance = await this.erc20.balanceOf(accounts[2]);
         assert.equal(balance.toNumber(), 50);
     });
+
+    it("I can transfer erc20 to token when approved for all via composable registry", async () => {
+        await this.composableRegistry.approveAll(accounts[0], {from: accounts[1]});
+        await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 50);
+        const balance = await this.registry.balanceOf(this.erc721.address, 2, this.erc20.address);
+        assert.equal(balance.toNumber(), 50);
+    });
 });
