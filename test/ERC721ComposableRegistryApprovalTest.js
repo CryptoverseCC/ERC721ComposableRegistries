@@ -140,14 +140,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("I can transfer when approved for type", async () => {
-        await this.registry.approveType(accounts[0], this.erc721.address, {from: accounts[1]});
+        await this.registry.approveType(accounts[0], this.erc721.address, true, {from: accounts[1]});
         await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[2]);
     });
 
     it("I cannot transfer when someone else is approved for type", async () => {
-        await this.registry.approveType(accounts[2], this.erc721.address, {from: accounts[1]});
+        await this.registry.approveType(accounts[2], this.erc721.address, true, {from: accounts[1]});
         try {
             await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
             assert.fail();
@@ -157,7 +157,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("I cannot transfer when someone else approved me for type", async () => {
-        await this.registry.approveType(accounts[0], this.erc721.address, {from: accounts[2]});
+        await this.registry.approveType(accounts[0], this.erc721.address, true, {from: accounts[2]});
         try {
             await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
             assert.fail();
@@ -168,7 +168,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
 
     it("I cannot transfer when approved for different type", async () => {
         const differentErc721 = await SampleERC721.new();
-        await this.registry.approveType(accounts[0], differentErc721.address, {from: accounts[1]});
+        await this.registry.approveType(accounts[0], differentErc721.address, true, {from: accounts[1]});
         try {
             await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
             assert.fail();
@@ -184,7 +184,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await this.erc721.create();
         await this.registry.transfer(this.erc721.address, 1, differentErc721.address, 1);
         await this.registry.transfer(differentErc721.address, 1, this.erc721.address, 5);
-        await this.registry.approveType(accounts[0], differentErc721.address, {from: accounts[1]});
+        await this.registry.approveType(accounts[0], differentErc721.address, true, {from: accounts[1]});
         await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 5);
         const owner = await this.registry.ownerOf(this.erc721.address, 5);
         assert.equal(owner, accounts[2]);

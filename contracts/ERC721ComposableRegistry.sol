@@ -154,8 +154,8 @@ contract ERC721ComposableRegistry {
         approved[msg.sender][spender][erc721][tokenId] = true;
     }
 
-    function approveType(address spender, ERC721 erc721) public {
-        approvedType[msg.sender][spender][erc721] = true;
+    function approveType(address spender, ERC721 erc721, bool value) public {
+        approvedType[msg.sender][spender][erc721] = value;
     }
 
     function approveAll(address spender, bool value) public {
