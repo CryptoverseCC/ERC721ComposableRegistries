@@ -66,7 +66,7 @@ contract ERC721ComposableRegistry {
 
     function transferToExistingToken(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
         address owner = ownerOf(whichErc721, whichTokenId);
-        require(owner == msg.sender || approvedAll[owner][msg.sender] || hasApproved(owner, msg.sender, whichErc721, whichTokenId));
+        require(owner == msg.sender || hasApproved(owner, msg.sender, whichErc721, whichTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
@@ -97,7 +97,7 @@ contract ERC721ComposableRegistry {
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(whichErc721.ownerOf(whichTokenId) == address(this));
         address owner = ownerOf(whichErc721, whichTokenId);
-        require(owner == msg.sender || approvedAll[owner][msg.sender] || hasApproved(owner, msg.sender, whichErc721, whichTokenId));
+        require(owner == msg.sender || hasApproved(owner, msg.sender, whichErc721, whichTokenId));
         transferImpl(to, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
@@ -107,6 +107,9 @@ contract ERC721ComposableRegistry {
     }
 
     function hasApproved(address owner, address spender, ERC721 erc721, uint tokenId) public view returns (bool) {
+        if (approvedAll[owner][spender]) {
+            return true;
+        }
         TokenIdentifier memory p = childToParent[erc721][tokenId];
         while (true) {
             if (approvedType[owner][spender][erc721]) {
