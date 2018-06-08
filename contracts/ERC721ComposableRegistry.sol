@@ -17,7 +17,7 @@ contract ERC721ComposableRegistry {
     mapping (address => mapping (uint => TokenIdentifier)) childToParent;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
     mapping (address => mapping (uint => uint)) childToIndexInParentToChildren;
-    mapping (address => mapping (address => mapping (address => mapping (uint => bool)))) approved;
+    mapping (address => mapping (address => mapping (uint => address))) approved;
     mapping (address => mapping (address => mapping (address => bool))) approvedType;
     mapping (address => mapping (address => bool)) approvedAll;
 
@@ -114,7 +114,7 @@ contract ERC721ComposableRegistry {
         while (true) {
             if (approvedType[owner][spender][erc721]) {
                 return true;
-            } else if (approved[owner][spender][erc721][tokenId]) {
+            } else if (approved[owner][erc721][tokenId] == spender) {
                 return true;
             } else if (p.erc721 == ERC721(0)) {
                 return erc721.getApproved(tokenId) == spender || erc721.isApprovedForAll(owner, spender);
@@ -151,7 +151,7 @@ contract ERC721ComposableRegistry {
     }
 
     function approve(address spender, ERC721 erc721, uint tokenId) public {
-        approved[msg.sender][spender][erc721][tokenId] = true;
+        approved[msg.sender][erc721][tokenId] = spender;
     }
 
     function approveType(address spender, ERC721 erc721, bool value) public {
