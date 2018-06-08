@@ -78,7 +78,7 @@ contract ERC721FungiblesRegistry {
 
     function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public {
         address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
-        require(owner == msg.sender || approved[owner][fromErc721][fromTokenId][msg.sender][erc20] >= amount);
+        require(owner == msg.sender || approved[owner][fromErc721][fromTokenId][msg.sender][erc20] >= amount || composableRegistry.hasApproved(owner, msg.sender, fromErc721, fromTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         approved[owner][fromErc721][fromTokenId][msg.sender][erc20] -= amount;

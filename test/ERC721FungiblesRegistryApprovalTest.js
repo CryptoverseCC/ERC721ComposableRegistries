@@ -116,4 +116,11 @@ contract('ERC721FungiblesRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I can transfer erc20 when approved via composable registry", async () => {
+        await this.composableRegistry.approve(accounts[0], this.erc721.address, 1, {from: accounts[1]});
+        await this.registry.transferToAddress(this.erc721.address, 1, accounts[2], this.erc20.address, 50);
+        const balance = await this.erc20.balanceOf(accounts[2]);
+        assert.equal(balance.toNumber(), 50);
+    });
 });
