@@ -192,4 +192,11 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const owner = await this.registry.ownerOf(this.erc721.address, 5);
         assert.equal(owner, accounts[2]);
     });
+
+    it("I can transfer to address when approved for all", async () => {
+        await this.registry.approveAll(accounts[0], {from: accounts[1]});
+        await this.registry.transferToAddress(accounts[2], this.erc721.address, 2);
+        const owner = await this.registry.ownerOf(this.erc721.address, 2);
+        assert.equal(owner, accounts[2]);
+    });
 });

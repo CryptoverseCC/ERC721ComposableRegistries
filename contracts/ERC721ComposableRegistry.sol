@@ -97,7 +97,7 @@ contract ERC721ComposableRegistry {
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         require(whichErc721.ownerOf(whichTokenId) == address(this));
         address owner = ownerOf(whichErc721, whichTokenId);
-        require(owner == msg.sender || hasApproved(owner, whichErc721, whichTokenId));
+        require(owner == msg.sender || approvedAll[owner][msg.sender] || hasApproved(owner, whichErc721, whichTokenId));
         transferImpl(to, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
