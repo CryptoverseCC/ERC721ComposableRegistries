@@ -109,12 +109,12 @@ contract ERC721ComposableRegistry {
     function hasApproved(address owner, ERC721 erc721, uint tokenId) private view returns (bool) {
         TokenIdentifier memory p = childToParent[erc721][tokenId];
         while (true) {
-            if (p.erc721 == ERC721(0)) {
-                return erc721.getApproved(tokenId) == msg.sender || erc721.isApprovedForAll(owner, msg.sender);
-            } else if (approvedType[owner][msg.sender][erc721]) {
+            if (approvedType[owner][msg.sender][erc721]) {
                 return true;
             } else if (approved[owner][msg.sender][erc721][tokenId]) {
                 return true;
+            } else if (p.erc721 == ERC721(0)) {
+                return erc721.getApproved(tokenId) == msg.sender || erc721.isApprovedForAll(owner, msg.sender);
             }
             erc721 = p.erc721;
             tokenId = p.tokenId;
