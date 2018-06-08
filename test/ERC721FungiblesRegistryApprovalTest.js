@@ -125,16 +125,28 @@ contract('ERC721FungiblesRegistry', (accounts) => {
     });
 
     it("I can transfer erc20 when approved for all via composable registry", async () => {
-        await this.composableRegistry.approveAll(accounts[0], {from: accounts[1]});
+        await this.composableRegistry.approveAll(accounts[0], true, {from: accounts[1]});
         await this.registry.transferToAddress(this.erc721.address, 1, accounts[2], this.erc20.address, 50);
         const balance = await this.erc20.balanceOf(accounts[2]);
         assert.equal(balance.toNumber(), 50);
     });
 
     it("I can transfer erc20 to token when approved for all via composable registry", async () => {
-        await this.composableRegistry.approveAll(accounts[0], {from: accounts[1]});
+        await this.composableRegistry.approveAll(accounts[0], true, {from: accounts[1]});
         await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 50);
         const balance = await this.registry.balanceOf(this.erc721.address, 2, this.erc20.address);
         assert.equal(balance.toNumber(), 50);
+    });
+
+    it("I cannot transfer erc20 when not longer approved via composable registry", async () => {
+        await this.composableRegistry.approveAll(accounts[0], true, {from: accounts[1]});
+        await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 1);
+        await this.composableRegistry.approveAll(accounts[0], false, {from: accounts[1]});
+        try {
+            await this.registry.transferFrom(this.erc721.address, 1, this.erc721.address, 2, this.erc20.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
     });
 });

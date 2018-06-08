@@ -18,6 +18,8 @@ contract ERC721FungiblesRegistry {
     mapping (address => mapping (uint => mapping (address => uint))) private balances;
     mapping (address => mapping (address => mapping (uint => mapping (address => mapping (address => uint))))) private approved;
 
+    uint private MAX_UINT = 2 * 256 - 1;
+
     constructor(ERC721ComposableRegistry cr) public {
         composableRegistry = cr;
     }
@@ -63,12 +65,11 @@ contract ERC721FungiblesRegistry {
 
     function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
         address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
-        require(owner == msg.sender || approved[owner][fromErc721][fromTokenId][msg.sender][erc20] >= amount || composableRegistry.hasApproved(owner, msg.sender, fromErc721, fromTokenId));
+        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.hasApproved(owner, msg.sender, fromErc721, fromTokenId));
         require(exists(toErc721, toTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         balances[toErc721][toTokenId][erc20] += amount;
-        approved[owner][fromErc721][fromTokenId][msg.sender][erc20] -= amount;
         emit ERC20Transfer(fromErc721, fromTokenId, toErc721, toTokenId, erc20, amount);
     }
 
@@ -84,6 +85,15 @@ contract ERC721FungiblesRegistry {
         approved[owner][fromErc721][fromTokenId][msg.sender][erc20] -= amount;
         assert(erc20.transfer(to, amount));
         emit ERC20Transfer(fromErc721, fromTokenId, to, erc20, amount);
+    }
+
+    function decreaseApproval(address owner, ERC721 fromErc721, uint fromTokenId, ERC20 erc20, uint amount) private returns (bool) {
+        uint current = approved[owner][fromErc721][fromTokenId][msg.sender][erc20];
+        if (current < amount) {
+            return false;
+        }
+        approved[owner][fromErc721][fromTokenId][msg.sender][erc20] -= amount;
+        return true;
     }
 
     function approve(ERC721 fromErc721, uint fromTokenId, address spender, ERC20 erc20, uint amount) public {

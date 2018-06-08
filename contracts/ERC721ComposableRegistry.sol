@@ -158,8 +158,8 @@ contract ERC721ComposableRegistry {
         approvedType[msg.sender][spender][erc721] = true;
     }
 
-    function approveAll(address spender) public {
-        approvedAll[msg.sender][spender] = true;
+    function approveAll(address spender, bool value) public {
+        approvedAll[msg.sender][spender] = value;
     }
 
     function ownerOf(ERC721 erc721, uint tokenId) public view returns (address) {

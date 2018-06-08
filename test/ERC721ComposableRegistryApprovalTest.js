@@ -113,14 +113,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("I can transfer when approved for all", async () => {
-        await this.registry.approveAll(accounts[0], {from: accounts[1]});
+        await this.registry.approveAll(accounts[0], true, {from: accounts[1]});
         await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[2]);
     });
 
     it("I cannot transfer when someone else is approved for all", async () => {
-        await this.registry.approveAll(accounts[2], {from: accounts[1]});
+        await this.registry.approveAll(accounts[2], true, {from: accounts[1]});
         try {
             await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
             assert.fail();
@@ -130,7 +130,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("I cannot transfer when someone else approved me for all", async () => {
-        await this.registry.approveAll(accounts[0], {from: accounts[2]});
+        await this.registry.approveAll(accounts[0], true, {from: accounts[2]});
         try {
             await this.registry.transfer(this.erc721.address, 4, this.erc721.address, 2);
             assert.fail();
@@ -191,7 +191,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("I can transfer to address when approved for all", async () => {
-        await this.registry.approveAll(accounts[0], {from: accounts[1]});
+        await this.registry.approveAll(accounts[0], true, {from: accounts[1]});
         await this.registry.transferToAddress(accounts[2], this.erc721.address, 2);
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[2]);
