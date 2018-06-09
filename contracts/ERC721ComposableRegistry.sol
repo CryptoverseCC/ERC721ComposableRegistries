@@ -109,7 +109,7 @@ contract ERC721ComposableRegistry {
 
     function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
         address owner = ownerOf(whichErc721, whichTokenId);
-        require(owner == msg.sender);
+        require(owner == msg.sender || hasApproved(owner, msg.sender, whichErc721, whichTokenId));
         whichErc721.safeTransferFrom(this, to, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
     }
