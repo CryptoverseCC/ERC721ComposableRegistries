@@ -9,11 +9,34 @@ contract ERC721 {
     function isApprovedForAll(address owner, address operator) public view returns (bool);
 }
 
-contract ERC721ComposableRegistry {
+contract ERC721Receiver {
+
+    function onERC721Received(address from, uint tokenId, bytes data) public returns (bytes4);
+}
+
+contract ERC721ComposableRegistryInterface {
 
     event ERC721Transfer(address from, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
     event ERC721Transfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId);
     event ERC721Transfer(address fromErc721, uint fromTokenId, address to, address whichErc721, uint whichTokenId);
+
+    function transfer(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) public;
+    function multiTransfer(ERC721 toErc721, uint toTokenId, ERC721[] whichErc721s, uint[] whichTokenIds) public;
+    function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public;
+    function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public;
+    function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public;
+
+    function approve(address spender, ERC721 erc721, uint tokenId) public;
+    function approveType(address spender, ERC721 erc721, bool value) public;
+    function approveAll(address spender, bool value) public;
+
+    function ownerOf(ERC721 erc721, uint tokenId) public view returns (address);
+    function parent(ERC721 erc721, uint tokenId) public view returns (ERC721, uint);
+    function children(ERC721 erc721, uint tokenId) public view returns (ERC721[], uint[]);
+    function hasApproved(address owner, address spender, ERC721 erc721, uint tokenId) public view returns (bool);
+}
+
+contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInterface {
 
     mapping (address => mapping (uint => TokenIdentifier)) childToParent;
     mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;

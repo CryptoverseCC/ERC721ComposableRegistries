@@ -8,11 +8,29 @@ contract ERC20 {
     function transferFrom(address from, address to, uint amount) public returns (bool);
 }
 
-contract ERC721FungiblesRegistry {
+contract ERC20Receiver {
+
+    function tokenFallback(address from, uint amount, bytes data) public returns (bytes4);
+    function receiveApproval(address from, uint amount, address token, bytes data) public returns (bytes4);
+    function receiveApproval(address from, uint amount, bytes data) public returns (bytes4);
+}
+
+contract ERC721FungiblesRegistryInterface {
 
     event ERC20Transfer(address from, address toErc721, uint toTokenId, address erc20, uint amount);
     event ERC20Transfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, address erc20, uint amount);
     event ERC20Transfer(address fromErc721, uint fromTokenId, address to, address erc20, uint amount);
+
+    function transfer(ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public;
+    function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public;
+    function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public;
+
+    function approve(ERC721 fromErc721, uint fromTokenId, address spender, ERC20 erc20, uint amount) public;
+
+    function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint);
+}
+
+contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterface {
 
     ERC721ComposableRegistry public composableRegistry;
     mapping (address => mapping (uint => mapping (address => uint))) private balances;
