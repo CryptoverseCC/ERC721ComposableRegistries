@@ -17,4 +17,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[1]);
     });
+
+    it("He cannot safe transfer my tokens to address", async () => {
+        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
+        try {
+            await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2, {from: accounts[1]});
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
