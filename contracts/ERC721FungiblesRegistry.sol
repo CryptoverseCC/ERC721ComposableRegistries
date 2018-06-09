@@ -35,6 +35,7 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
     ERC721ComposableRegistry public composableRegistry;
     mapping (address => mapping (uint => mapping (address => uint))) private balances;
     mapping (address => mapping (address => mapping (uint => mapping (address => mapping (address => uint))))) private approved;
+    bool private approvedAll;
 
     constructor(ERC721ComposableRegistry cr) public {
         composableRegistry = cr;
@@ -95,7 +96,7 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
 
     function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public {
         address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
-        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.isApproved(owner, msg.sender, fromErc721, fromTokenId));
+        require(owner == msg.sender || approvedAll || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.isApproved(owner, msg.sender, fromErc721, fromTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         assert(erc20.transfer(to, amount));
@@ -114,6 +115,10 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
     function approve(ERC721 fromErc721, uint fromTokenId, address spender, ERC20 erc20, uint amount) public {
         require(exists(fromErc721, fromTokenId));
         approved[msg.sender][fromErc721][fromTokenId][spender][erc20] = amount;
+    }
+
+    function approveAll(address spender) public {
+        approvedAll = true;
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {
