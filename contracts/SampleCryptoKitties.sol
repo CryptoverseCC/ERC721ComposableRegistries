@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity ^0.4.23;
 
 /// @title Interface for contracts conforming to ERC-721: Non-Fungible Tokens
 /// @author Dieter Shirley <dete@axiomzen.co> (https://github.com/dete)
@@ -160,7 +160,7 @@ contract KittyBase {
             delete kittyIndexToApproved[_tokenId];
         }
         // Emit the transfer event.
-        Transfer(_from, _to, _tokenId);
+        emit Transfer(_from, _to, _tokenId);
     }
 
     /// @dev An internal method that creates a new kitty and stores it. This
@@ -213,7 +213,7 @@ contract KittyBase {
         require(newKittenId == uint256(uint32(newKittenId)));
 
         // emit the birth event
-        Birth(
+        emit Birth(
             _owner,
             newKittenId,
             uint256(_kitty.matronId),
@@ -342,7 +342,7 @@ contract KittyOwnership is KittyBase, ERC721 {
         _approve(_tokenId, _to);
 
         // Emit approval event.
-        Approval(msg.sender, _to, _tokenId);
+        emit Approval(msg.sender, _to, _tokenId);
     }
 
     /// @notice Transfer a Kitty owned by another address, for which the calling address
@@ -452,7 +452,7 @@ contract KittyMinting is KittyOwnership {
 contract SampleCryptoKitties is KittyMinting {
 
     /// @notice Creates the main CryptoKitties smart contract instance.
-    function SampleCryptoKitties() public {
+    constructor() public {
 
         // start with the mythical kitten 0 - so we don't have generation-0 parent issues
         _createKitty(0, 0, 0, uint256(-1), address(0));
