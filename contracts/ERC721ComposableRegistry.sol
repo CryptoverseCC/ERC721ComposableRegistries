@@ -25,6 +25,7 @@ contract ERC721ComposableRegistryInterface {
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public;
     function multiTransferToAddress(address to, ERC721[] whichErc721s, uint[] whichTokenIds) public;
     function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public;
+    function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId, bytes data) public;
 
     function approve(address spender, ERC721 erc721, uint tokenId) public;
     function approveType(address spender, ERC721 erc721, bool value) public;
@@ -131,6 +132,10 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
     }
 
     function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
+        safeTransferToAddress(to, whichErc721, whichTokenId, "");
+    }
+
+    function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId, bytes data) public {
         address owner = ownerOf(whichErc721, whichTokenId);
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
         whichErc721.safeTransferFrom(this, to, whichTokenId);
