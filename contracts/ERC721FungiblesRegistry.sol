@@ -26,6 +26,11 @@ contract ERC721FungiblesRegistryInterface {
     function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public;
 
     function approve(ERC721 fromErc721, uint fromTokenId, address spender, ERC20 erc20, uint amount) public;
+    //function approveType(ERC721 fromErc721, address spender, ERC20 erc20, uint amount) public;
+    //function approveAll(address spender, ERC20 erc20, uint amount) public;
+    //function approve(ERC721 fromErc721, uint fromTokenId, address spender) public;
+    //function approveType(ERC721 fromErc721, address spender) public;
+    function approveAll(address spender, bool value) public;
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint);
 }
@@ -82,7 +87,7 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
 
     function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
         address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
-        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.isApproved(owner, msg.sender, fromErc721, fromTokenId));
+        require(owner == msg.sender || approvedAll[owner][msg.sender] || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.isApproved(owner, msg.sender, fromErc721, fromTokenId));
         require(exists(toErc721, toTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
