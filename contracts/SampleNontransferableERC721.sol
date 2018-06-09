@@ -1,6 +1,6 @@
 pragma solidity ^0.4.23;
 
-import 'zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol';
+import 'openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol';
 
 contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721", "NON") {
 

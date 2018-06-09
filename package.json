@@ -1,6 +1,7 @@
 {
-  "devDependencies": {
-    "zeppelin-solidity": "1.8.0",
-    "web3-eth-abi": "1.0.0-beta.34"
+  "dependencies": {
+    "openzeppelin-solidity": "1.10.0",
+    "web3-eth-abi": "1.0.0-beta.34",
+    "js-sha3": "0.5.5"
   }
 }
