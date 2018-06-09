@@ -94,6 +94,7 @@ contract ERC721FungiblesRegistry {
     }
 
     function approve(ERC721 fromErc721, uint fromTokenId, address spender, ERC20 erc20, uint amount) public {
+        require(exists(fromErc721, fromTokenId));
         approved[msg.sender][fromErc721][fromTokenId][spender][erc20] = amount;
     }
 

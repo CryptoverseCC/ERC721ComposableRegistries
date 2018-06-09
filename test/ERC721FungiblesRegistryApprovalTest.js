@@ -161,4 +161,13 @@ contract('ERC721FungiblesRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I cannot approve for non-existing token", async () => {
+        try {
+            await this.registry.approve(this.erc721.address, 6, accounts[1], this.erc20.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
