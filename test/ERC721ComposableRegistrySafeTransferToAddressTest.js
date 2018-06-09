@@ -10,18 +10,18 @@ contract('ERC721ComposableRegistry', (accounts) => {
         this.erc721 = await SampleERC721.new();
         await this.erc721.create();
         await this.erc721.create();
+        await this.erc721.create({from: accounts[2]});
         await this.erc721.setApprovalForAll(this.registry.address, true);
+        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
     });
 
     it("I can safe transfer to address", async () => {
-        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2);
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[1]);
     });
 
     it("He cannot safe transfer my tokens to address", async () => {
-        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         try {
             await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2, {from: accounts[1]});
             assert.fail();
@@ -31,7 +31,6 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("He can safe transfer approved tokens to address", async () => {
-        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         await this.registry.approve(accounts[1], this.erc721.address, 2);
         await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2, {from: accounts[1]});
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
@@ -39,7 +38,6 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("Token has no children after safe transfer", async () => {
-        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2);
         const children = await this.registry.children(this.erc721.address, 1);
         assert.equal(children[0].length, 0);
@@ -47,7 +45,6 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("Event is emitted after safe transfer", async () => {
-        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         const r = await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2);
         assert.equal(r.logs.length, 1);
         assert.equal(r.logs[0].event, 'ERC721Transfer');
@@ -60,10 +57,17 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("I can safe transfer to address with data", async () => {
-        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
         safeTransferToAddressWithData(accounts[0], this.registry.address, accounts[1], this.erc721.address, 2, '0xdeadbeef');
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[1]);
+    });
+
+    it("Different registry accepts token and assigns parent", async () => {
+        const differentRegistry = await ERC721ComposableRegistry.new();
+        const to = formatToByteArray(this.erc721.address, 3);
+        safeTransferToAddressWithData(accounts[0], this.registry.address, differentRegistry.address, this.erc721.address, 2, to);
+        const owner = await differentRegistry.ownerOf(this.erc721.address, 2);
+        assert.equal(owner, accounts[2]);
     });
 });
 
@@ -76,4 +80,8 @@ function safeTransferToAddressWithData(from, registryAddress, to, whichErc721, w
         from, to: registryAddress, data: transferMethodTransactionData, value: 0, gas: 500000
     });
     return web3.eth.getTransactionReceipt(txHash);
+}
+
+function formatToByteArray(toErc721, toTokenId) {
+    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
 }
