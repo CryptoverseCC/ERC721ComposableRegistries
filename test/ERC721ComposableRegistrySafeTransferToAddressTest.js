@@ -10,7 +10,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         this.erc721 = await SampleERC721.new();
         await this.erc721.create();
         await this.erc721.create();
-        await this.erc721.create({from: accounts[2]});
+        await this.erc721.create();
         await this.erc721.setApprovalForAll(this.registry.address, true);
         await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
     });
@@ -66,8 +66,9 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const differentRegistry = await ERC721ComposableRegistry.new();
         const to = formatToByteArray(this.erc721.address, 3);
         safeTransferToAddressWithData(accounts[0], this.registry.address, differentRegistry.address, this.erc721.address, 2, to);
-        const owner = await differentRegistry.ownerOf(this.erc721.address, 2);
-        assert.equal(owner, accounts[2]);
+        const parent = await differentRegistry.parent(this.erc721.address, 2);
+        assert.equal(parent[0], this.erc721.address);
+        assert.equal(parent[1], 3);
     });
 });
 
