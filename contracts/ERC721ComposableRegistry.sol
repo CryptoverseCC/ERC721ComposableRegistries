@@ -4,6 +4,7 @@ contract ERC721 {
 
     function ownerOf(uint tokenId) public view returns (address);
     function transferFrom(address from, address to, uint tokenId) public;
+    function safeTransferFrom(address from, address to, uint tokenId) public;
     function getApproved(uint tokenId) public view returns (address);
     function isApprovedForAll(address owner, address operator) public view returns (bool);
 }
@@ -104,6 +105,11 @@ contract ERC721ComposableRegistry {
         delete childToParent[whichErc721][whichTokenId];
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];
         emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721, whichTokenId);
+    }
+
+    function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
+        whichErc721.safeTransferFrom(this, to, whichTokenId);
+        delete childToParent[whichErc721][whichTokenId];
     }
 
     function hasApproved(address owner, address spender, ERC721 erc721, uint tokenId) public view returns (bool) {
