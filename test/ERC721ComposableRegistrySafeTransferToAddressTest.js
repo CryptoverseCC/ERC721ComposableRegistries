@@ -35,4 +35,12 @@ contract('ERC721ComposableRegistry', (accounts) => {
         const owner = await this.registry.ownerOf(this.erc721.address, 2);
         assert.equal(owner, accounts[1]);
     });
+
+    it("Token has no children after safe transfer", async () => {
+        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
+        await this.registry.safeTransferToAddress(accounts[1], this.erc721.address, 2);
+        const children = await this.registry.children(this.erc721.address, 1);
+        assert.equal(children[0].length, 0);
+        assert.equal(children[1].length, 0);
+    });
 });
