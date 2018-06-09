@@ -38,12 +38,12 @@ contract ERC721ComposableRegistryInterface {
 
 contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInterface {
 
-    mapping (address => mapping (uint => TokenIdentifier)) childToParent;
-    mapping (address => mapping (uint => TokenIdentifier[])) parentToChildren;
-    mapping (address => mapping (uint => uint)) childToIndexInParentToChildren;
-    mapping (address => mapping (address => mapping (uint => address))) approved;
-    mapping (address => mapping (address => mapping (address => bool))) approvedType;
-    mapping (address => mapping (address => bool)) approvedAll;
+    mapping (address => mapping (uint => TokenIdentifier)) private childToParent;
+    mapping (address => mapping (uint => TokenIdentifier[])) private parentToChildren;
+    mapping (address => mapping (uint => uint)) private childToIndexInParentToChildren;
+    mapping (address => mapping (address => mapping (uint => address))) private approved;
+    mapping (address => mapping (address => mapping (address => bool))) private approvedType;
+    mapping (address => mapping (address => bool)) private approvedAll;
 
     struct TokenIdentifier {
         ERC721 erc721;
