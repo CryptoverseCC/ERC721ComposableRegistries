@@ -201,4 +201,15 @@ contract('ERC721FungiblesRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I cannot transfer when no longer approved for all tokens and all erc20 types", async () => {
+        await this.registry.approveAll(accounts[0], true, {from: accounts[1]});
+        await this.registry.approveAll(accounts[0], false, {from: accounts[1]});
+        try {
+            await this.registry.transferToAddress(this.erc721.address, 1, accounts[0], this.erc20.address, 50);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });

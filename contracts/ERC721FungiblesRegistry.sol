@@ -118,7 +118,7 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
     }
 
     function approveAll(address spender, bool value) public {
-        approvedAll[msg.sender][spender] = true;
+        approvedAll[msg.sender][spender] = value;
     }
 
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint) {
