@@ -81,7 +81,7 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
 
     function transferFrom(ERC721 fromErc721, uint fromTokenId, ERC721 toErc721, uint toTokenId, ERC20 erc20, uint amount) public {
         address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
-        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.hasApproved(owner, msg.sender, fromErc721, fromTokenId));
+        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.isApproved(owner, msg.sender, fromErc721, fromTokenId));
         require(exists(toErc721, toTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
@@ -95,7 +95,7 @@ contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterf
 
     function transferToAddress(ERC721 fromErc721, uint fromTokenId, address to, ERC20 erc20, uint amount) public {
         address owner = composableRegistry.ownerOf(fromErc721, fromTokenId);
-        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.hasApproved(owner, msg.sender, fromErc721, fromTokenId));
+        require(owner == msg.sender || decreaseApproval(owner, fromErc721, fromTokenId, erc20, amount) || composableRegistry.isApproved(owner, msg.sender, fromErc721, fromTokenId));
         require(balanceOf(fromErc721, fromTokenId, erc20) >= amount);
         balances[fromErc721][fromTokenId][erc20] -= amount;
         assert(erc20.transfer(to, amount));
