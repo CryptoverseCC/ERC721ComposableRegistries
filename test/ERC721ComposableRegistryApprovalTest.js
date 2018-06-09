@@ -207,4 +207,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("I cannot approve non-existing token", async () => {
+        try {
+            await this.registry.approve(accounts[1], this.erc721.address, 6);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });

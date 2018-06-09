@@ -151,6 +151,7 @@ contract ERC721ComposableRegistry {
     }
 
     function approve(address spender, ERC721 erc721, uint tokenId) public {
+        require(exists(erc721, tokenId));
         approved[msg.sender][erc721][tokenId] = spender;
     }
 
