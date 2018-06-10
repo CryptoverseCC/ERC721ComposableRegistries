@@ -100,13 +100,16 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
-        if (supportsInterface(whichErc721, 0x7741746a)) {
-            ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, toErc721, toTokenId, whichTokenId);
+        bool hasParent = p.erc721 != ERC721(0);
+        if (hasParent) {
+            if (supportsInterface(whichErc721, 0x7741746a)) {
+                ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, toErc721, toTokenId, whichTokenId);
+            }
         }
         transferImpl(this, whichErc721, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         addChild(toErc721, toTokenId, whichErc721, whichTokenId);
-        if (p.erc721 != ERC721(0)) {
+        if (hasParent) {
             emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
         } else {
             emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);

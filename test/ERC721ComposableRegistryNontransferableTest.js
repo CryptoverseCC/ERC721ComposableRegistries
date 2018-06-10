@@ -16,7 +16,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
 
     it("Cannot transfer nontransferable token", async () => {
         try {
-            await this.registry.transfer(erc721.address, 2, this.nontransferable721.address, 1);
+            await this.registry.transfer(this.erc721.address, 2, this.nontransferable721.address, 1);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
@@ -39,5 +39,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
         }
+    });
+
+    it("Owner can transfer 'nontransferable' token from address", async () => {
+        await this.nontransferable721.create(accounts[0], '');
+        await this.nontransferable721.setApprovalForAll(this.registry.address, true);
+        await this.registry.transfer(this.erc721.address, 2, this.nontransferable721.address, 2);
+        const parent = await this.registry.parent(this.nontransferable721.address, 2);
+        assert.equal(parent[0], this.erc721.address);
+        assert.equal(parent[1], 2);
     });
 });
