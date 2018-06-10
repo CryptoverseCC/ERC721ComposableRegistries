@@ -31,4 +31,13 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("Cannot safe transfer nontransferable token to address", async () => {
+        try {
+            await this.registry.safeTransferToAddress(accounts[0], this.nontransferable721.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
