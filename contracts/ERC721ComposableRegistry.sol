@@ -39,6 +39,7 @@ contract ERC721ComposableRegistryInterface {
 
 contract ERC721ComposableRegistryCallbacks {
 
+    function onComposableRegistryTransfer(address from, address toErc721, uint toTokenId, uint whichTokenId) public;
     function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, uint whichTokenId) public;
     function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address to, uint whichTokenId) public;
 }
@@ -104,6 +105,10 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         if (hasParent) {
             if (supportsInterface(whichErc721, 0x7741746a)) {
                 ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, toErc721, toTokenId, whichTokenId);
+            }
+        } else {
+            if (supportsInterface(whichErc721, 0xf3b8c02c)) {
+                ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(msg.sender, toErc721, toTokenId, whichTokenId);
             }
         }
         transferImpl(this, whichErc721, whichTokenId);

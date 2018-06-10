@@ -1,6 +1,7 @@
 pragma solidity ^0.4.23;
 
 import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract SupportsInterface {
 
@@ -15,9 +16,10 @@ contract SupportsInterface {
     }
 }
 
-contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721", "NON"), SupportsInterface {
+contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721", "NON"), Ownable, SupportsInterface {
 
     constructor() public {
+        supportedInterfaces[0xf3b8c02c] = true;
         supportedInterfaces[0x7741746a] = true;
         supportedInterfaces[0xc34cfb3f] = true;
     }
@@ -36,6 +38,10 @@ contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721
             size := extcodesize(receiver)
         }
         return size > 0;
+    }
+
+    function onComposableRegistryTransfer(address from, address /* toErc721 */, uint /* toTokenId */, uint /* whichTokenId */) public view {
+        require(from == owner);
     }
 
     function onComposableRegistryTransfer(address /* fromErc721 */, uint /* fromTokenId */, address /* toErc721 */, uint /* toTokenId */, uint /* whichTokenId */) public pure {
