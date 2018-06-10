@@ -40,6 +40,7 @@ contract ERC721ComposableRegistryInterface {
 contract ERC721ComposableRegistryCallbacks {
 
     function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, uint whichTokenId) public;
+    function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address to, uint whichTokenId) public;
 }
 
 contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInterface {
@@ -98,9 +99,11 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         address owner = ownerOf(whichErc721, whichTokenId);
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
-        callTransferCallback(toErc721, toTokenId, whichErc721, whichTokenId);
-        transferImpl(this, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
+        if (supportsInterface(whichErc721, 0x7741746a)) {
+            ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, toErc721, toTokenId, whichTokenId);
+        }
+        transferImpl(this, whichErc721, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         addChild(toErc721, toTokenId, whichErc721, whichTokenId);
         if (p.erc721 != ERC721(0)) {
@@ -117,13 +120,6 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
             toErc721 = p.erc721;
             toTokenId = p.tokenId;
         } while (toErc721 != ERC721(0));
-    }
-
-    function callTransferCallback(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
-        if (supportsInterface(whichErc721, 0x7741746a)) {
-            TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
-            ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, toErc721, toTokenId, whichTokenId);
-        }
     }
 
     function supportsInterface(address erc721, bytes4 id) private view returns (bool) {
@@ -162,8 +158,11 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         require(whichErc721.ownerOf(whichTokenId) == address(this));
         address owner = ownerOf(whichErc721, whichTokenId);
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
-        transferImpl(to, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
+        if (supportsInterface(whichErc721, 0xc34cfb3f)) {
+            ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, to, whichTokenId);
+        }
+        transferImpl(to, whichErc721, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];

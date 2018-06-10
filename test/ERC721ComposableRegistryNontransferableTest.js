@@ -4,16 +4,28 @@ const SampleNontransferableERC721 = artifacts.require("SampleNontransferableERC7
 
 contract('ERC721ComposableRegistry', (accounts) => {
 
+    beforeEach(async () => {
+        this.registry = await ERC721ComposableRegistry.new();
+        this.erc721 = await SampleERC721.new();
+        await this.erc721.create();
+        await this.erc721.create();
+        this.nontransferable721 = await SampleNontransferableERC721.new();
+        const to = '0x' + this.erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
+        await this.nontransferable721.create(this.registry.address, to);
+    });
+
     it("Cannot transfer nontransferable token", async () => {
-        const registry = await ERC721ComposableRegistry.deployed();
-        const erc721 = await SampleERC721.deployed();
-        await erc721.create();
-        await erc721.create();
-        const nontransferable721 = await SampleNontransferableERC721.deployed();
-        const to = '0x' + erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
-        await nontransferable721.create(registry.address, to);
         try {
-            await registry.transfer(erc721.address, 2, nontransferable721.address, 1);
+            await this.registry.transfer(erc721.address, 2, this.nontransferable721.address, 1);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
+
+    it("Cannot transfer nontransferable token to address", async () => {
+        try {
+            await this.registry.transferToAddress(accounts[0], this.nontransferable721.address, 1);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;

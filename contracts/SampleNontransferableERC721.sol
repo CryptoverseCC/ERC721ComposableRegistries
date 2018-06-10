@@ -33,5 +33,6 @@ contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721
     }
 
     function onComposableRegistryTransfer(address /* fromErc721 */, uint /* fromTokenId */, address /* to */, uint /* whichTokenId */) public pure {
+        revert();
     }
 }
