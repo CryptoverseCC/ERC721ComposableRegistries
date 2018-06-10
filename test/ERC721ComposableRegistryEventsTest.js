@@ -128,6 +128,19 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(addressAtIndex(l.data, 3), this.erc721.address);
         assert.equal(intAtIndex(l.data, 4), 2);
     });
+
+    it("Correct transfer event is emitted after transfer of approved token", async () => {
+        await this.registry.approveAll(accounts[1], true);
+        const r = await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2, {from: accounts[1]});
+        assert.equal(r.logs.length, 1);
+        assert.equal(r.logs[0].event, 'ERC721Transfer');
+        const args = r.logs[0].args;
+        assert.equal(args.from, accounts[0]);
+        assert.equal(args.toErc721, this.erc721.address);
+        assert.equal(args.toTokenId, 1);
+        assert.equal(args.whichErc721, this.erc721.address);
+        assert.equal(args.whichTokenId, 2);
+    });
 });
 
 function safeTransferFrom(from, registryAddress, toErc721, toTokenId, whichErc721, whichTokenId) {

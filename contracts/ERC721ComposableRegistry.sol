@@ -111,13 +111,14 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
                 ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(msg.sender, toErc721, toTokenId, whichTokenId);
             }
         }
+        address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
         removeFromParentToChildren(whichErc721, whichTokenId);
         addChild(toErc721, toTokenId, whichErc721, whichTokenId);
         if (hasParent) {
             emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
         } else {
-            emit ERC721Transfer(msg.sender, toErc721, toTokenId, whichErc721, whichTokenId);
+            emit ERC721Transfer(ownerOfWhichByErc721, toErc721, toTokenId, whichErc721, whichTokenId);
         }
     }
 
