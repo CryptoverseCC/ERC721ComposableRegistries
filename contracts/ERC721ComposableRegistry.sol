@@ -37,6 +37,11 @@ contract ERC721ComposableRegistryInterface {
     function isApproved(address owner, address spender, ERC721 erc721, uint tokenId) public view returns (bool);
 }
 
+contract ERC721ComposableRegistryCallbacks {
+
+    function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, uint whichTokenId) public;
+}
+
 contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInterface {
 
     mapping (address => mapping (uint => TokenIdentifier)) private childToParent;
@@ -59,7 +64,7 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         uint toTokenId = bytesToUint(to, 32);
         require(exists(toErc721, toTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
-        add(toErc721, toTokenId, whichErc721, whichTokenId);
+        addChild(toErc721, toTokenId, whichErc721, whichTokenId);
         emit ERC721Transfer(from, toErc721, toTokenId, whichErc721, whichTokenId);
         return 0xf0b9e5ba;
     }
@@ -93,10 +98,11 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         address owner = ownerOf(whichErc721, whichTokenId);
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
+        callTransferCallback(toErc721, toTokenId, whichErc721, whichTokenId);
         transferImpl(this, whichErc721, whichTokenId);
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         removeFromParentToChildren(whichErc721, whichTokenId);
-        add(toErc721, toTokenId, whichErc721, whichTokenId);
+        addChild(toErc721, toTokenId, whichErc721, whichTokenId);
         if (p.erc721 != ERC721(0)) {
             emit ERC721Transfer(p.erc721, p.tokenId, toErc721, toTokenId, whichErc721, whichTokenId);
         } else {
@@ -113,7 +119,40 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         } while (toErc721 != ERC721(0));
     }
 
-    function add(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
+    function callTransferCallback(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
+        if (supportsInterface(whichErc721, 0x7741746a)) {
+            TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
+            ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, toErc721, toTokenId, whichTokenId);
+        }
+    }
+
+    function supportsInterface(address erc721, bytes4 id) private view returns (bool) {
+        uint success;
+        uint result;
+        (success, result) = supportsInterfaceNoThrowCall(erc721, 0x01ffc9a7);
+        if (success == 0 || result == 0) {
+            return false;
+        }
+        (success, result) = supportsInterfaceNoThrowCall(erc721, 0xffffffff);
+        if (success == 0 || result != 0) {
+            return false;
+        }
+        (success, result) = supportsInterfaceNoThrowCall(erc721, id);
+        return success == 1 && result == 1;
+    }
+
+    function supportsInterfaceNoThrowCall(address erc721, bytes4 id) private view returns (uint success, uint result) {
+        bytes4 supportsInterfaceSignature = 0x01ffc9a7;
+        assembly {
+            let freeMem := mload(0x40)
+            mstore(freeMem, supportsInterfaceSignature)
+            mstore(add(freeMem, 4), id)
+            success := staticcall(30000, erc721, freeMem, 0x20, freeMem, 0x20)
+            result := mload(freeMem)
+        }
+    }
+
+    function addChild(ERC721 toErc721, uint toTokenId, ERC721 whichErc721, uint whichTokenId) private {
         childToParent[whichErc721][whichTokenId] = TokenIdentifier(toErc721, toTokenId);
         uint length = parentToChildren[toErc721][toTokenId].push(TokenIdentifier(whichErc721, whichTokenId));
         childToIndexInParentToChildren[whichErc721][whichTokenId] = length - 1;
@@ -173,8 +212,10 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
 
     function transferImpl(address to, ERC721 whichErc721, uint whichTokenId) private {
         address ownerOfWhichByErc721 = whichErc721.ownerOf(whichTokenId);
-        address(whichErc721).call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);
-        whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
+        if (ownerOfWhichByErc721 != to) {
+            address(whichErc721).call(/* approve(address,uint256) */ 0x095ea7b3, this, whichTokenId);
+            whichErc721.transferFrom(ownerOfWhichByErc721, to, whichTokenId);
+        }
     }
 
     function removeFromParentToChildren(ERC721 whichErc721, uint whichTokenId) private {
