@@ -1,3 +1,5 @@
+const web3Abi = require('web3-eth-abi');
+
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
 const SampleNontransferableERC721 = artifacts.require("SampleNontransferableERC721.sol");
@@ -10,7 +12,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await this.erc721.create();
         await this.erc721.create();
         this.nontransferable721 = await SampleNontransferableERC721.new();
-        const to = '0x' + this.erc721.address.substring(2).padStart(64, '0') + '1'.padStart(64, '0');
+        const to = formatToByteArray(this.erc721.address, 1);
         await this.nontransferable721.create(this.registry.address, to);
     });
 
@@ -60,4 +62,34 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("Someone else cannot safe transfer nontransferable token", async () => {
+        await this.nontransferable721.create(accounts[1], '');
+        try {
+            safeTransferFrom(accounts[1], this.registry.address, this.erc721.address, 2, this.nontransferable721.address, 2, {from: accounts[1]});
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
+
+function safeTransferFrom(from, registryAddress, toErc721, toTokenId, whichErc721, whichTokenId) {
+    const to = formatToByteArray(toErc721, toTokenId);
+    return safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId);
+}
+
+function safeTransferFromImpl(from, registryAddress, to, whichErc721, whichTokenId) {
+    const safeTransferFromFunc = SampleERC721.abi.find(f => f.name === 'safeTransferFrom' && f.inputs.length === 4);
+    const transferMethodTransactionData = web3Abi.encodeFunctionCall(
+        safeTransferFromFunc, [from, registryAddress, whichTokenId, to]
+    );
+    const txHash = web3.eth.sendTransaction({
+        from, to: whichErc721, data: transferMethodTransactionData, value: 0, gas: 500000
+    });
+    return web3.eth.getTransactionReceipt(txHash);
+}
+
+function formatToByteArray(toErc721, toTokenId) {
+    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
+}

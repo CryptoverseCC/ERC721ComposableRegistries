@@ -41,7 +41,7 @@ contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721
     }
 
     function onComposableRegistryTransfer(address from, address /* toErc721 */, uint /* toTokenId */, uint /* whichTokenId */) public view {
-        require(from == owner);
+        require(from == 0 || from == owner);
     }
 
     function onComposableRegistryTransfer(address /* fromErc721 */, uint /* fromTokenId */, address /* toErc721 */, uint /* toTokenId */, uint /* whichTokenId */) public pure {

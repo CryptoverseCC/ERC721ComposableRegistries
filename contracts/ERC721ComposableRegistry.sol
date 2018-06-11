@@ -66,6 +66,9 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         uint toTokenId = bytesToUint(to, 32);
         require(exists(toErc721, toTokenId));
         requireNoCircularDependency(toErc721, toTokenId, whichErc721, whichTokenId);
+        if (supportsInterface(whichErc721, 0xf3b8c02c)) {
+            ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(from, toErc721, toTokenId, whichTokenId);
+        }
         addChild(toErc721, toTokenId, whichErc721, whichTokenId);
         emit ERC721Transfer(from, toErc721, toTokenId, whichErc721, whichTokenId);
         return 0xf0b9e5ba;
