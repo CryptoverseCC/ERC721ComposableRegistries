@@ -39,6 +39,10 @@ contract ERC721ComposableRegistryInterface {
 
 contract ERC721ComposableRegistryCallbacks {
 
+    //function onComposableRegistryTransferFrom(uint fromTokenId, address toErc721, uint toTokenId, address whichErc721, uint whichTokenId) public;
+    //function onComposableRegistryTransferFrom(uint fromTokenId, address to, address whichErc721, uint whichTokenId) public;
+    //function onComposableRegistryTransferTo(address from, uint toTokenId, address whichErc721, uint whichTokenId) public;
+    //function onComposableRegistryTransferTo(address fromErc721, uint fromTokenId, uint toTokenId, address whichErc721, uint whichTokenId) public;
     function onComposableRegistryTransfer(address from, address toErc721, uint toTokenId, uint whichTokenId) public;
     function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, uint whichTokenId) public;
     function onComposableRegistryTransfer(address fromErc721, uint fromTokenId, address to, uint whichTokenId) public;
