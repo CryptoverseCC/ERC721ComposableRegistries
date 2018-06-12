@@ -1,3 +1,5 @@
+const { formatToByteArray } = require('./Utils');
+
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const ERC721FungiblesRegistry = artifacts.require("ERC721FungiblesRegistry.sol");
 const SampleERC20 = artifacts.require("SampleERC20.sol");
@@ -37,7 +39,3 @@ contract('ERC721FungiblesRegistry', (accounts) => {
         assert.equal(balance, 50);
     });
 });
-
-function formatToByteArray(toErc721, toTokenId) {
-    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
-}

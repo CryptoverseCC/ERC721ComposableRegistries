@@ -1,4 +1,4 @@
-const web3Abi = require('web3-eth-abi');
+const { safeTransferToAddressWithData, formatToByteArray } = require('./Utils');
 
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
@@ -71,18 +71,3 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(parent[1], 3);
     });
 });
-
-function safeTransferToAddressWithData(from, registryAddress, to, whichErc721, whichTokenId, data) {
-    const safeTransferToAddressFunc = ERC721ComposableRegistry.abi.find(f => f.name === 'safeTransferToAddress' && f.inputs.length === 4);
-    const transferMethodTransactionData = web3Abi.encodeFunctionCall(
-        safeTransferToAddressFunc, [to, whichErc721, whichTokenId, data]
-    );
-    const txHash = web3.eth.sendTransaction({
-        from, to: registryAddress, data: transferMethodTransactionData, value: 0, gas: 500000
-    });
-    return web3.eth.getTransactionReceipt(txHash);
-}
-
-function formatToByteArray(toErc721, toTokenId) {
-    return '0x' + toErc721.substring(2).padStart(64, '0') + toTokenId.toString().padStart(64, '0');
-}
