@@ -123,4 +123,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
             if (ignore.name === 'AssertionError') throw ignore;
         }
     });
+
+    it("Cannot transfer to registry address", async () => {
+        await this.registry.transfer(this.erc721.address, 1, this.erc721.address, 2);
+        try {
+            await this.registry.transferToAddress(this.registry.address, this.erc721.address, 2);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });

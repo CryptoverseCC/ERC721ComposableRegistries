@@ -171,6 +171,7 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
     }
 
     function transferToAddress(address to, ERC721 whichErc721, uint whichTokenId) public {
+        require(to != address(this));
         require(whichErc721.ownerOf(whichTokenId) == address(this));
         address owner = ownerOf(whichErc721, whichTokenId);
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
