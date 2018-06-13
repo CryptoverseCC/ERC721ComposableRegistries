@@ -190,16 +190,17 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
     }
 
     function safeTransferToAddress(address to, ERC721 whichErc721, uint whichTokenId, bytes data) public {
+        require(to != address(this));
         address owner = ownerOf(whichErc721, whichTokenId);
         require(owner == msg.sender || isApproved(owner, msg.sender, whichErc721, whichTokenId));
         TokenIdentifier memory p = childToParent[whichErc721][whichTokenId];
         if (supportsInterface(whichErc721, 0xc34cfb3f)) {
             ERC721ComposableRegistryCallbacks(whichErc721).onComposableRegistryTransfer(p.erc721, p.tokenId, to, whichTokenId);
         }
-        whichErc721.safeTransferFrom(this, to, whichTokenId, data);
         removeFromParentToChildren(whichErc721, whichTokenId);
         delete childToParent[whichErc721][whichTokenId];
         delete childToIndexInParentToChildren[whichErc721][whichTokenId];
+        whichErc721.safeTransferFrom(this, to, whichTokenId, data);
         emit ERC721Transfer(p.erc721, p.tokenId, to, whichErc721, whichTokenId);
     }
 

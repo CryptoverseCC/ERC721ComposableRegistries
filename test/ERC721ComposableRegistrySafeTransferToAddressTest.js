@@ -70,4 +70,14 @@ contract('ERC721ComposableRegistry', (accounts) => {
         assert.equal(parent[0], this.erc721.address);
         assert.equal(parent[1], 3);
     });
+
+    it("Cannot safe transfer to registry address", async () => {
+        const to = formatToByteArray(this.erc721.address, 1);
+        try {
+            safeTransferToAddressWithData(accounts[0], this.registry.address, this.registry.address, this.erc721.address, 2, to);
+            assert.fail();
+        } catch (ignore) {
+            if (ignore.name === 'AssertionError') throw ignore;
+        }
+    });
 });
