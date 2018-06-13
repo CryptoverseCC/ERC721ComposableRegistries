@@ -13,7 +13,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
         await this.erc721.create();
         this.nontransferable721 = await SampleNontransferableERC721.new();
         const to = formatToByteArray(this.erc721.address, 1);
-        await this.nontransferable721.create(this.registry.address, to);
+        await this.nontransferable721.createToken(this.registry.address, to);
     });
 
     it("Cannot transfer nontransferable token", async () => {
@@ -44,7 +44,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("Owner can transfer 'nontransferable' token from address", async () => {
-        await this.nontransferable721.create(accounts[0], '');
+        await this.nontransferable721.createToken(accounts[0], '');
         await this.nontransferable721.setApprovalForAll(this.registry.address, true);
         await this.registry.transfer(this.erc721.address, 2, this.nontransferable721.address, 2);
         const parent = await this.registry.parent(this.nontransferable721.address, 2);
@@ -53,7 +53,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("Someone else cannot transfer nontransferable token from address", async () => {
-        await this.nontransferable721.create(accounts[1], '');
+        await this.nontransferable721.createToken(accounts[1], '');
         await this.nontransferable721.setApprovalForAll(this.registry.address, true, {from: accounts[1]});
         try {
             await this.registry.transfer(this.erc721.address, 2, this.nontransferable721.address, 2, {from: accounts[1]});
@@ -64,7 +64,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
     });
 
     it("Someone else cannot safe transfer nontransferable token", async () => {
-        await this.nontransferable721.create(accounts[1], '');
+        await this.nontransferable721.createToken(accounts[1], '');
         try {
             safeTransferFrom(accounts[1], this.registry.address, this.erc721.address, 2, this.nontransferable721.address, 2, {from: accounts[1]});
             assert.fail();

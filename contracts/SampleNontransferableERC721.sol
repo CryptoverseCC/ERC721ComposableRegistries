@@ -24,7 +24,7 @@ contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721
         supportedInterfaces[0xc34cfb3f] = true;
     }
 
-    function create(ERC721Receiver receiver, bytes to) public {
+    function createToken(ERC721Receiver receiver, bytes to) public {
         uint tokenId = allTokens.length + 1;
         _mint(receiver, tokenId);
         if (isContract(receiver)) {
