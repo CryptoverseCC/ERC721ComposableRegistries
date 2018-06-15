@@ -35,6 +35,17 @@ contract ERC721FungiblesRegistryInterface {
     function balanceOf(ERC721 erc721, uint tokenId, ERC20 erc20) public view returns (uint);
 }
 
+contract ERC721FungiblesRegistryCallbacks {
+
+    //function onFungiblesRegistryTransferFrom(uint fromTokenId, address toErc721, uint toTokenId, address erc20, uint amount) public;
+    //function onFungiblesRegistryTransferFrom(uint fromTokenId, address to, address erc20, uint amount) public;
+    //function onFungiblesRegistryTransferTo(address from, uint toTokenId, address erc20, uint amount) public;
+    //function onFungiblesRegistryTransferTo(address fromErc721, uint fromTokenId, uint toTokenId, address erc20, uint amount) public;
+    //function onFungiblesRegistryTransfer(address from, address toErc721, uint toTokenId, uint amount) public;
+    //function onFungiblesRegistryTransfer(address fromErc721, uint fromTokenId, address toErc721, uint toTokenId, uint amount) public;
+    //function onFungiblesRegistryTransfer(address fromErc721, uint fromTokenId, address to, uint amount) public;
+}
+
 contract ERC721FungiblesRegistry is ERC20Receiver, ERC721FungiblesRegistryInterface {
 
     ERC721ComposableRegistry public composableRegistry;
