@@ -1,4 +1,4 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
 contract ERC721 {
 
@@ -11,7 +11,7 @@ contract ERC721 {
 
 contract ERC721Receiver {
 
-    function onERC721Received(address from, uint tokenId, bytes data) public returns (bytes4);
+    function onERC721Received(address operator, address from, uint tokenId, bytes data) public returns (bytes4);
 }
 
 contract ERC721ComposableRegistryInterface {
@@ -62,7 +62,7 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         uint tokenId;
     }
 
-    function onERC721Received(address from, uint whichTokenId, bytes to) public returns (bytes4) {
+    function onERC721Received(address /* operator */, address from, uint whichTokenId, bytes to) public returns (bytes4) {
         require(to.length == 64);
         ERC721 whichErc721 = ERC721(msg.sender);
         require(ownerOf(whichErc721, whichTokenId) == address(this));
@@ -75,7 +75,7 @@ contract ERC721ComposableRegistry is ERC721Receiver, ERC721ComposableRegistryInt
         }
         addChild(toErc721, toTokenId, whichErc721, whichTokenId);
         emit ERC721Transfer(from, toErc721, toTokenId, whichErc721, whichTokenId);
-        return 0xf0b9e5ba;
+        return 0x150b7a02;
     }
 
     function bytesToUint(bytes b, uint index) private pure returns (uint) {

@@ -1,22 +1,8 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
-import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
+import "@0xcert/ethereum-erc721/contracts/tokens/NFTokenEnumerable.sol";
 
-contract SupportsInterface {
-
-    mapping(bytes4 => bool) internal supportedInterfaces;
-
-    constructor() public {
-        supportedInterfaces[0x01ffc9a7] = true;
-    }
-
-    function supportsInterface(bytes4 id) public view returns (bool) {
-        return supportedInterfaces[id];
-    }
-}
-
-contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721", "NON"), Ownable, SupportsInterface {
+contract SampleNontransferableERC721 is NFTokenEnumerable {
 
     constructor() public {
         supportedInterfaces[0xf3b8c02c] = true;
@@ -24,20 +10,12 @@ contract SampleNontransferableERC721 is ERC721Token("SampleNontransferableERC721
         supportedInterfaces[0xc34cfb3f] = true;
     }
 
-    function createToken(ERC721Receiver receiver, bytes to) public {
-        uint tokenId = allTokens.length + 1;
+    function createToken(ERC721TokenReceiver receiver, bytes to) public {
+        uint tokenId = tokens.length + 1;
         _mint(receiver, tokenId);
-        if (isContract(receiver)) {
-            receiver.onERC721Received(0, tokenId, to);
+        if (AddressUtils.isContract(receiver)) {
+            receiver.onERC721Received(msg.sender, 0, tokenId, to);
         }
-    }
-
-    function isContract(address receiver) private view returns (bool) {
-        uint size;
-        assembly {
-            size := extcodesize(receiver)
-        }
-        return size > 0;
     }
 
     function onComposableRegistryTransfer(address from, address /* toErc721 */, uint /* toTokenId */, uint /* whichTokenId */) public view {

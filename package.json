@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "openzeppelin-solidity": "1.10.0",
+    "@0xcert/ethereum-erc20": "1.2.1",
+    "@0xcert/ethereum-erc721": "1.9.1",
     "web3-eth-abi": "1.0.0-beta.34",
     "js-sha3": "0.5.5"
   }
