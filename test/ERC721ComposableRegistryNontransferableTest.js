@@ -1,4 +1,4 @@
-const { safeTransferFrom, formatToByteArray } = require('./Utils');
+const { safeTransferFrom, safeTransferToAddress, formatToByteArray } = require('./Utils');
 
 const ERC721ComposableRegistry = artifacts.require("ERC721ComposableRegistry.sol");
 const SampleERC721 = artifacts.require("SampleERC721.sol");
@@ -36,7 +36,7 @@ contract('ERC721ComposableRegistry', (accounts) => {
 
     it("Cannot safe transfer nontransferable token to address", async () => {
         try {
-            await this.registry.safeTransferToAddress(accounts[0], this.nontransferable721.address, 1);
+            safeTransferToAddress(accounts[0], this.registry.address, [accounts[0], this.nontransferable721.address, 1]);
             assert.fail();
         } catch (ignore) {
             if (ignore.name === 'AssertionError') throw ignore;
